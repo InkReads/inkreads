@@ -1,3 +1,5 @@
+'use client';
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -17,6 +19,8 @@ import { Roboto } from "next/font/google";
 import { MenuIcon, SearchIcon, ChevronDownIcon } from "lucide-react";
 import Logo from "@/assets/logo.png";
 
+import { usePathname } from "next/navigation"
+
 const roboto = Roboto({
   subsets: ["latin"],  
   weight: "500",
@@ -28,6 +32,11 @@ const sections = [
 ];
 
 export default function TopNavBar() {
+    const pathname = usePathname();
+
+    const hiddenPages = ["/login-page", "/signup-page"];
+    if (hiddenPages.includes(pathname)) return null;
+
   return (
     <header className={`${roboto.className} px-4 border-b-[0.5px]`}>
       <div className="flex w-full h-16 justify-between">
@@ -76,8 +85,8 @@ export default function TopNavBar() {
             </div>
             <Input placeholder="Search..." className="max-w-sm md:w-[16rem] lg:w-[20rem] h-10 shadow-none pl-10"  />
           </div>
-          <Button variant="link" asChild className="hidden sm:block"><Link href="/">LOGIN</Link></Button>
-          <Button variant="link" asChild className="hidden sm:block"><Link href="/">SIGN UP </Link></Button>
+                  <Button variant="link" asChild className="hidden sm:block"><Link href="/login-page">LOGIN</Link></Button>
+          <Button variant="link" asChild className="hidden sm:block"><Link href="/signup-page">SIGN UP </Link></Button>
         </section>
       </div>
     </header>
@@ -104,8 +113,8 @@ const NavSheet = () => {
                 <Link href="/">{Object.keys(item)}</Link>
               </Button>
             ))}
-            <Button variant="link" asChild><Link href="/">LOGIN</Link></Button>
-            <Button variant="link" asChild><Link href="/">SIGN UP</Link></Button>
+            <Button variant="link" asChild><Link href="/login-page">LOGIN</Link></Button>
+            <Button variant="link" asChild><Link href="/signup-page">SIGN UP</Link></Button>
           </div>
         </SheetContent>
       </Sheet>
