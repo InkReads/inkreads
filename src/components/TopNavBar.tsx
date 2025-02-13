@@ -65,9 +65,7 @@ export default function TopNavBar() {
                       asChild key={key}
                       className="px-4 hover:bg-muted"
                     >
-                      <Link
-                        href="/"
-                      >
+                       <Link href={`/browse/${subItem.toLowerCase().replace(/\s+/g, '-')}`}>
                         {subItem}
                       </Link>
                     </Button>
