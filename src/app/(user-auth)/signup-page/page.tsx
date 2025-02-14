@@ -6,7 +6,7 @@ import googleIcon from '../../assets/google.png'
 import bookIcon from '../../assets/book.png'
 import notebookIcon from '../../assets/notebook.png'
 import { useState } from 'react';
-import { auth, googleProvider, signInWithPopup } from '../../lib/firebase.config';
+import { auth, googleProvider, signInWithPopup } from '@/lib/firebase.config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation'; 
 import Link from "next/link";
