@@ -6,6 +6,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import FormSeparator from "./form-separator";
 import GoogleAuthButton from "./google-button";
 import Link from "next/link";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase.config";
+import { useRouter } from "next/navigation";
 
 interface FormFieldProps {
   username: string,
@@ -14,57 +17,58 @@ interface FormFieldProps {
 }
 
 export default function SignupForm() {
-  const { register, handleSubmit } = useForm<FormFieldProps>();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormFieldProps>();
+  const router = useRouter();
 
   const handleSignup: SubmitHandler<FormFieldProps> = async (data) => {
-    console.log(data);
-  }
-
-  {/*
-    const handleSignup = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setError(null);
-
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert('User created successfully!');
-        router.push('/login-page'); 
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-            setError(err.message);
-        } else {
-            setError("An unexpected error occurred.");
-        }
+    try {
+      const { email, password } = data;
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("User created successfully!");
+      router.push("/login-page");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("An unexpected error occurred.");
       }
-    };
-  */}
+    }
+  };
 
   return (
     <form className="flex flex-col justify-center items-center" onSubmit={handleSubmit(handleSignup)}>
-      <div className="flex flex-col gap-6 w-[420px] sm:w-[521px] mt-4 [&>input]:h-10 [&>input]:text-xl [&>input]:rounded-lg [&>input]:pl-[10px] [&>input]:shadow-none">
+      <div className={`flex flex-col w-[420px] sm:w-[521px] mt-4 [&>input]:h-10 [&>input]:text-xl [&>input]:rounded-lg [&>input]:pl-[10px] [&>input]:shadow-none ${errors.username || errors.email || errors.password ? "gap-2" : "gap-6"}`}>
         <Input 
           placeholder="Username" 
           {...register("username", {
-            required: true,
+            required: "Username is required",
           })} 
           type="text" 
         />
+        {errors.username && <span className="text-red-500">{errors.username?.message}</span>}
         <Input 
           placeholder="Email" 
           {...register("email", {
-            required: true,
-            pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+            required: "Email is required",
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Invalid email address",
+            }
           })} 
           type="text" 
         />
+        {errors.email && <span className="text-red-500">{errors.email?.message}</span>}
         <Input 
           placeholder="Password" 
           {...register("password", {
-            required: true,
+            required: "Password is required",
           })} 
           type="password" 
         />
-        <Button type="submit" className="text-xl rounded-lg bg-[#4D74FF] hover:bg-[#4D74FF]">Continue</Button>
+        {errors.password && <span className="text-red-500">{errors.password?.message}</span>}
+        <Button disabled={isSubmitting} type="submit" className="text-xl rounded-lg bg-[#4D74FF] hover:bg-[#4D74FF]">
+          {isSubmitting ? "Loading..." : "Continue"}
+        </Button>
       </div>
       <FormSeparator />
       <GoogleAuthButton />
