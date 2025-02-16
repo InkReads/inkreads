@@ -4,7 +4,6 @@ import { HomeIcon, FileHeart, FlameIcon } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -25,7 +24,7 @@ const items = [
   },
   {
     title: "Trending",
-    url: "/",
+    url: "/test-page",
     icon: FlameIcon,
   }
 ]

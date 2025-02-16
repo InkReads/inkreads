@@ -22,10 +22,10 @@ const roboto = Roboto({
 });
 
 export default function HomeNavbar() {
-    const pathname = usePathname();
+  const pathname = usePathname();
 
-    const hiddenPages = ["/login-page", "/signup-page"];
-    if (hiddenPages.includes(pathname)) return null;
+  const hiddenPages = ["/login-page", "/signup-page"];
+  if (hiddenPages.includes(pathname)) return null;
 
   return (
     <nav className={`${roboto.className} fixed top-0 left-0 right-0 h-16 px-4 bg-white border-b-[0.5px] flex items-center z-50`}>
