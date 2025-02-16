@@ -1,10 +1,10 @@
 import HomeLayout from "@/modules/layouts/home-layout";
 
-interface HomeLayoutProps {
+interface LayoutProps {
   children: React.ReactNode;
 }
 
-export default function Layout({ children }: HomeLayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout>
       {children}
