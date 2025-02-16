@@ -24,7 +24,7 @@ const items = [
   },
   {
     title: "Trending",
-    url: "/test-page",
+    url: "/",
     icon: FlameIcon,
   }
 ]
