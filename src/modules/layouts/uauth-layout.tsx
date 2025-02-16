@@ -1,6 +1,4 @@
 import { ABeeZee } from "next/font/google";
-import GoogleAuthButton from "@/modules/components/user-auth/google-button";
-import FormSeparator from "@/modules/components/user-auth/form-separator";
 import Image from "next/image";
 import bookIcon from "@/assets/book.png";
 import notebookIcon from "@/assets/notebook.png";
