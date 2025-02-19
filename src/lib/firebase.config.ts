@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -22,5 +24,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-export { app, auth, googleProvider, signInWithPopup };
+const saveUserProfile = async (uid: string, email: string, username: string) => {
+	try {
+		console.log("Saving user to Firestore:", { uid, email, username });
+		await setDoc(doc(db, "users", uid), {
+			uid,
+			email,
+			username,
+			readingList: []
+		}, { merge: true });
+	} catch (error) {
+		console.error("Error saving user profile: ", error);
+	}
+};
+
+const fetchBooks = async () => {
+	const booksCollection = collection(db, "books");
+	const booksSnapshot = await getDocs(booksCollection);
+	return booksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export { app, auth, googleProvider, signInWithPopup, db, storage, saveUserProfile, fetchBooks };

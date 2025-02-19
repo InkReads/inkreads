@@ -7,7 +7,7 @@ import FormSeparator from "./form-separator";
 import GoogleAuthButton from "./google-button";
 import Link from "next/link";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase.config";
+import { auth, saveUserProfile } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
 
 interface FormFieldProps {
@@ -22,8 +22,16 @@ export default function SignupForm() {
 
   const handleSignup: SubmitHandler<FormFieldProps> = async (data) => {
     try {
-      const { email, password } = data;
-      await createUserWithEmailAndPassword(auth, email, password);
+      const { email, password, username } = data;
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Save user profile to Firestore
+      await saveUserProfile(
+        userCredential.user.uid,
+        email,
+        username
+      );
+      
       alert("User created successfully!");
       router.push("/login-page");
     } catch (err: unknown) {

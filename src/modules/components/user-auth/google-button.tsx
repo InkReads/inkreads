@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase.config";
+import { auth, googleProvider, saveUserProfile } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import googleIcon from '@/assets/google.png'
@@ -12,7 +12,16 @@ export default function GoogleAuthButton() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Save user profile to Firestore
+      await saveUserProfile(
+        user.uid,
+        user.email || '',
+        user.displayName || user.email?.split('@')[0] || ''
+      );
+      
       alert("Logged in successfully!");
       router.push('/');
     } catch (error) {
