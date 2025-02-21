@@ -1,4 +1,4 @@
-'use client';
+"use client"
 
 import Link from "next/link";
 import Image from "next/image";
@@ -10,23 +10,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ChevronDownIcon } from "lucide-react";
-import { usePathname } from "next/navigation"
-import { sections } from "@/modules/constants/sections";
 import { Roboto } from "next/font/google";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SearchInput from "./search-input";
+import AuthActions from "./auth-actions";
+import { useAuth } from "@/modules/context/auth-context";
 
 const roboto = Roboto({
   subsets: ["latin"],  
   weight: "500",
 });
 
+const sections = [
+  {"COMMUNITY": ["Stories", "Authors", "Users"]}, 
+  {"BROWSE": ["Novels", "Light Novels", "Comics", "Fanfiction"]},
+]
+
 export default function HomeNavbar() {
-  const pathname = usePathname();
-
-  const hiddenPages = ["/login-page", "/signup-page"];
-  if (hiddenPages.includes(pathname)) return null;
-
+  const user = useAuth();
+  
   return (
     <nav className={`${roboto.className} fixed top-0 left-0 right-0 h-16 px-4 bg-white border-b-[0.5px] flex items-center z-50`}>
       <header className="w-full flex gap-2 items-center">
@@ -70,11 +72,10 @@ export default function HomeNavbar() {
         ))}
       </header>
 
-      {/* Search and Auth */ }
+      {/* Search and Auth Actions */ }
       <section className="flex gap-4 items-center">
         <SearchInput />
-        <Button variant="link" asChild className="hidden sm:block"><Link href="/login-page">LOGIN</Link></Button>
-        <Button variant="link" asChild className="hidden sm:block"><Link href="/signup-page">SIGN UP </Link></Button>
+        <AuthActions />
       </section>
     </nav>
   );
