@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/modules/context/auth-context";
 import Link from "next/link";
 
@@ -18,11 +18,12 @@ export default function AuthActions() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="cursor-pointer">
         <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="avatar" />
-          <AvatarFallback>EX</AvatarFallback>
+          <AvatarFallback>{user.email?.substring(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="">
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+        <DropdownMenuSeparator className="w-full ml-0 bg-gray-300"/>
         <section className="flex flex-col items-start">
           {ProfileItems.map((item, key) => (
             <Button variant="link" asChild key={key}>

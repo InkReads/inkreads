@@ -14,7 +14,7 @@ export default function Logout() {
       setUser(null);
       setTimeout(() => {
         router.push("/");
-      }, 5000)
+      }, 2500)
     })
   }, [])
 
