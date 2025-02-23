@@ -8,7 +8,7 @@ export default function SearchInput() {
       <div className="absolute left-2.5 top-2 text-muted-foreground">
         <SearchIcon />
       </div>
-      <Input placeholder="Search..." className="sm:w-[16rem] lg:w-[20rem] h-10 shadow-none pl-10" onClick={()=>{}}/>
+      <Input placeholder="Search..." className="w-[14rem] sm:w-[18rem] lg:w-[24rem] h-10 shadow-none pl-10" onClick={()=>{}}/>
     </form>
   )
 }
