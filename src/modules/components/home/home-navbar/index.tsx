@@ -43,9 +43,9 @@ export default function HomeNavbar() {
       <section className="inline-flex items-center">
         <SearchInput />
         {/* Navbar Menu Items */ }
-        <div className="flex justify-between pr-2">
+        <div className="flex justify-between mx-2">
           {sections.map((item, key) => (
-            <DropdownMenu key={key}>
+            <DropdownMenu key={key} modal={false}>
               <DropdownMenuTrigger asChild className="focus:outline-none text-inherit">
                 <div className="hidden lg:block items-center cursor-pointer hover:text-gray-600">
                   <Button variant={"ghost"}>
