@@ -6,7 +6,7 @@ import Link from "next/link";
 
 
 export default function AuthActions() {
-  const { user } = useAuth();
+  const { user, username } = useAuth();
 
   const ProfileItems = [
     { name: "Profile", href:"/profile" },
@@ -22,7 +22,7 @@ export default function AuthActions() {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+        <DropdownMenuLabel>{username || user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator className="w-full ml-0 bg-gray-300"/>
         <section className="flex flex-col items-start">
           {ProfileItems.map((item, key) => (
