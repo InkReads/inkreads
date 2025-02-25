@@ -1,22 +1,19 @@
-import { Button } from "@/components/ui/button";
 import { DM_Sans } from "next/font/google";
-import BentoGrid from "./bento-grid";
+import HeroIntro from "./hero-intro";
+import Image from "next/image";
+import HeroImage from "@/assets/hero-image.jpg";
 
 const dmSans = DM_Sans({ subsets: ['latin'] });
 
 export default function Hero() {
   return (
-    <section className={`${dmSans.className} flex flex-col justify-center items-center w-full gap-10 mt-16 md:flex-row md:pr-10`}>
-      <div className="flex flex-col items-center gap-4 tracking-tight text-center">
-        <p className="text-6xl font-medium">Welcome to InkReads.</p>
-        <span className="mx-8">
-          <p className="text-2xl">Read, storytell, and review.</p>
-          <p className="text-lg hidden md:inline-block">Create reading lists and explore new titles to your mind's content.</p>
-        </span>
-        <Button variant={"default"} size={"lg"} className="text-xl h-12">Get started</Button>
-      </div>
-      <div className="flex w-48 md:w-72 lg:w-96 h-full justify-center items-center ">
-        <BentoGrid />
+    <section className={`${dmSans.className} flex justify-evenly items-center w-full h-[48rem] bg-black text-white`}>
+      <div className="flex justify-center items-center gap-24">
+        <HeroIntro />
+        <div className="relative bg-white p-2 rounded-2xl">
+
+          <Image src={HeroImage} alt="hero-image" height={600} className="rounded-xl object-cover"/>
+        </div>
       </div>
     </section>
   );

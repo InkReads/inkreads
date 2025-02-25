@@ -3,7 +3,7 @@ import Hero from "@/modules/components/home/home-hero";
 
 export default function Home() {
   return (
-    <main className="flex flex-col gap-6">
+    <main className="flex flex-col">
       <Hero />
       <Separator />
     </main>
