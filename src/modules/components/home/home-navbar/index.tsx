@@ -63,7 +63,7 @@ export default function HomeNavbar() {
                       className="px-4 hover:bg-muted"
                     >
                       <Link
-                        href={`/${subItem.toLowerCase()}`}
+                        href={`/${subItem.toLowerCase().replace(" ", "")}`}
                       >
                         {subItem}
                       </Link>
