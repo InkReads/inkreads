@@ -47,4 +47,15 @@ const fetchBooks = async () => {
 	return booksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export { app, auth, googleProvider, signInWithPopup, db, storage, saveUserProfile, fetchBooks };
+const fetchUser = async () => {
+	const user = auth.currentUser;
+	console.log("Current User: ", user);
+	if (user) {
+		const userRef = doc(db, "users", user.uid);
+		const userDoc = await getDoc(userRef);
+		return userDoc.data();
+	}
+	return null;
+}
+
+export { app, auth, googleProvider, signInWithPopup, db, storage, saveUserProfile, fetchBooks, fetchUser };

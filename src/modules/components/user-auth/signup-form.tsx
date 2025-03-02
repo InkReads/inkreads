@@ -6,9 +6,11 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import FormSeparator from "./form-separator";
 import GoogleAuthButton from "./google-button";
 import Link from "next/link";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, saveUserProfile } from "@/lib/firebase.config";
+import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { auth, db, saveUserProfile } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
+import { collection, query, where, getDocs } from 'firebase/firestore';
+
 
 interface FormFieldProps {
   username: string,
@@ -20,11 +22,24 @@ export default function SignupForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormFieldProps>();
   const router = useRouter();
 
+
   const handleSignup: SubmitHandler<FormFieldProps> = async (data) => {
     try {
       const { email, password, username } = data;
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
+      // Check for duplicate username
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('username', '==', username));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        alert('Username already exists. Please choose a different username.');
+        return;
+      }
+
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);      
+
+
       // Save user profile to Firestore
       await saveUserProfile(
         userCredential.user.uid,
