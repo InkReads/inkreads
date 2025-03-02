@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useAuth } from "@/modules/context/auth-context";
 
 const items = [
   {
@@ -33,7 +34,9 @@ const items = [
 ]
 
 export default function PersonalSection() {
-  return (
+  const { user } = useAuth();
+
+  return user ? (
     <SidebarGroup>
       <SidebarGroupLabel>
         Personal
@@ -58,5 +61,7 @@ export default function PersonalSection() {
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
+  ) : (
+    null
   )
 }

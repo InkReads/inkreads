@@ -9,6 +9,7 @@ import Link from "next/link";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/modules/context/auth-context";
 
 interface FormFieldProps {
   username: string,
@@ -18,12 +19,15 @@ interface FormFieldProps {
 
 export default function LoginForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormFieldProps>();
+  const { setUser } = useAuth();
   const router = useRouter();
 
   const handleLogin: SubmitHandler<FormFieldProps> = async (data) => {
     const { email, password } = data;
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setUser(userCredential.user);
+      console.log("User signed in :" + userCredential.user);
       alert("Login successful!");
       router.push("/");
     } catch (err: unknown) {
