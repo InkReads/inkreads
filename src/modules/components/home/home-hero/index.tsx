@@ -1,19 +1,16 @@
 import { DM_Sans } from "next/font/google";
 import HeroIntro from "./hero-intro";
 import Image from "next/image";
-import HeroImage from "@/assets/hero-image.jpg";
+import HeroImage from "@/assets/hero-image.png";
 
 const dmSans = DM_Sans({ subsets: ['latin'] });
 
 export default function Hero() {
   return (
-    <section className={`${dmSans.className} flex justify-evenly items-center w-full h-[48rem] bg-black text-white`}>
-      <div className="flex justify-center items-center gap-24">
+    <section className={`${dmSans.className} flex justify-center items-center h-[80vh] bg-gradient-to-b from-[#e3abfb] to-[#6ebbfe] via-[#d7adfc]`}>
+      <div className="w-[60%] flex justify-evenly items-center gap-48">
         <HeroIntro />
-        <div className="relative bg-white p-2 rounded-2xl">
-
-          <Image src={HeroImage} alt="hero-image" height={600} className="rounded-xl object-cover"/>
-        </div>
+        <Image src={HeroImage} alt="hero-image" height={450} className="rounded-xl object-cover hidden lg:inline-block"/>
       </div>
     </section>
   );
