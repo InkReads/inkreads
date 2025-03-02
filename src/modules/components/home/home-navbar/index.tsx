@@ -13,6 +13,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import SearchInput from "./search-input";
 import AuthActions from "./auth-actions";
 import { useAuth } from "@/modules/context/auth-context";
+import { useEffect, useState } from "react";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],  
@@ -25,10 +26,21 @@ const sections = [
 ]
 
 export default function HomeNavbar() {
-  const user = useAuth();
-  
+  const [scroll, setScroll] = useState<boolean>(false);
+
+  const handleScroll = () => {
+    window.scrollY > 10 ? setScroll(true) : setScroll(false);
+  }
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    }
+  }, [])
+
   return (
-    <nav className={`${dmSans.className} fixed top-0 left-0 right-0 h-16 px-4 bg-white border-b-[0.5px] flex items-center z-50`}>
+    <nav className={`${dmSans.className} fixed top-0 left-0 right-0 h-16 px-4  flex items-center z-50 ${scroll ? "bg-white shadow-md" : "bg-[#e3abfb]"}`}>
       <header className="w-full flex gap-8 items-center">
         {/* Menu and Logo */ }
         <div className="flex gap-4 items-center">

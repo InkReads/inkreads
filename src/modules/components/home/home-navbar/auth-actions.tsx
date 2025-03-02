@@ -35,8 +35,7 @@ export default function AuthActions() {
     </DropdownMenu>
   ) : (
     <div className="flex gap-2">
-      <Button variant="link" asChild className="hidden sm:block"><Link href="/login-page">Login</Link></Button>
-      <Button variant="default" asChild className="hidden sm:block"><Link href="/signup-page">Sign up </Link></Button>
+      <Button variant="default" asChild className="hidden sm:block"><Link href="/login-page">Login</Link></Button>
     </div>
   )
 } 
