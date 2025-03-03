@@ -38,7 +38,7 @@ export default function LandingHeader() {
   }, [])
 
   return (
-    <nav className={`${dmSans.className} fixed top-0 left-0 right-0 h-16 px-4  flex items-center text-white z-50 ${scroll ? "bg-white shadow-md text-black" : "bg-transparent text-white"}`}>
+    <nav className={`${dmSans.className} fixed top-0 left-0 right-0 h-16 px-4 flex items-cente z-50 ${scroll ? "bg-white shadow-md text-black" : "bg-transparent text-white"}`}>
       <header className="w-full flex gap-8 items-center">
         {/* Menu and Logo */ }
         <div className="flex gap-4 items-center">
