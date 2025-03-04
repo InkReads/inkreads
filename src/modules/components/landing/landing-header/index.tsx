@@ -9,9 +9,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDownIcon } from "lucide-react";
 import { DM_Sans } from "next/font/google";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import SearchInput from "./search-input";
 import AuthActions from "./auth-actions";
+import { useEffect, useState } from "react";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],  
@@ -23,13 +23,25 @@ const sections = [
   {"Browse": ["Novels", "Light Novels", "Comics", "Fanfiction"]},
 ]
 
-export default function HomeNavbar() {
+export default function LandingHeader() {
+  const [scroll, setScroll] = useState<boolean>(false);
+
+  const handleScroll = () => {
+    window.scrollY > 10 ? setScroll(true) : setScroll(false);
+  }
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    }
+  }, [])
+
   return (
-    <nav className={`${dmSans.className} fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 bg-white shadow-md`}>
+    <nav className={`${dmSans.className} fixed top-0 left-0 right-0 h-16 px-4 flex items-cente z-50 ${scroll ? "bg-white shadow-md text-black" : "bg-transparent text-white"}`}>
       <header className="w-full flex gap-8 items-center">
         {/* Menu and Logo */ }
         <div className="flex gap-4 items-center">
-          <SidebarTrigger size={"icon"} />
           <Link href="/">
             <span className="text-2xl">InkReads</span>
           </Link>

@@ -18,7 +18,7 @@ export default function AuthActions() {
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild className="cursor-pointer">
         <Avatar>
-          <AvatarFallback>{user.email?.substring(0, 2).toUpperCase()}</AvatarFallback>
+          <AvatarFallback className="text-black">{user.email?.substring(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

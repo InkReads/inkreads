@@ -29,7 +29,7 @@ export default function LoginForm() {
       setUser(userCredential.user);
       console.log("User signed in :" + userCredential.user);
       alert("Login successful!");
-      router.push("/");
+      router.push("/home");
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message);
