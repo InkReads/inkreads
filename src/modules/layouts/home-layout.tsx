@@ -15,7 +15,7 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
           <HomeNavbar />
           <div className="flex min-h-screen pt-[4rem]">
             <HomeSidebar />
-            <main className="flex-1 overflow-y-auto">
+            <main className="flex-1 overflow-y-hidden">
               {children}
             </main>
           </div>
