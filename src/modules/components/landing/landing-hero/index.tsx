@@ -10,7 +10,7 @@ const dmSans = DM_Sans({ subsets: ['latin'] });
 export default function Hero() {
   return (
     <section 
-      className={`${dmSans.className} relative flex w-full justify-center items-center h-[85vh]`}
+      className={`${dmSans.className} relative flex w-full justify-center items-center h-screen`}
     >
       <LandingHeader />
       <Image src={BGImage} alt="bg-image" quality={100} className="absolute top-0 -z-10 brightness-[0.5] h-full w-full" />
