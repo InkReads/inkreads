@@ -1,4 +1,4 @@
-import HomeLayout from "@/modules/layouts/home-layout";
+import HomeLayout from "@/layouts/home-layout";
 
 interface LayoutProps {
   children: React.ReactNode;

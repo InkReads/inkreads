@@ -1,4 +1,4 @@
-import LandingLayout from "@/modules/layouts/landing-layout";
+import LandingLayout from "@/layouts/landing-layout";
 
 interface LayoutProps {
   children: React.ReactNode;

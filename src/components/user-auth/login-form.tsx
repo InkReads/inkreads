@@ -9,7 +9,7 @@ import Link from "next/link";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/modules/context/auth-context";
+import { useAuth } from "@/context/auth-context";
 
 interface FormFieldProps {
   username: string,
