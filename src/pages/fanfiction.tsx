@@ -1,6 +1,6 @@
 import HomeLayout from '../layouts/home-layout';
 import "../app/globals.css";
-import BookSearch from '../components/book-search/search';
+import BookSearch from '../components/book-search/book-search';
 
 export default function GenrePage() {
   return (
