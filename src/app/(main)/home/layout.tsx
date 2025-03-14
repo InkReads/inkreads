@@ -1,4 +1,4 @@
-import UserAuthLayout from "@/modules/layouts//uauth-layout";
+import HomeLayout from "@/layouts/home-layout";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -6,8 +6,8 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <UserAuthLayout>
+    <HomeLayout>
       {children}
-    </UserAuthLayout>
+    </HomeLayout>
   )
 }
