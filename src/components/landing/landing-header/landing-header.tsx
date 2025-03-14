@@ -12,6 +12,7 @@ import { DM_Sans } from "next/font/google";
 import SearchInput from "./search-input";
 import AuthActions from "./auth-actions";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/auth-context";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],  
@@ -25,6 +26,7 @@ const sections = [
 
 export default function LandingHeader() {
   const [scroll, setScroll] = useState<boolean>(false);
+  const { user } = useAuth();
 
   const handleScroll = () => {
     window.scrollY > 10 ? setScroll(true) : setScroll(false);
@@ -42,7 +44,7 @@ export default function LandingHeader() {
       <header className="w-full flex gap-8 items-center">
         {/* Menu and Logo */ }
         <div className="flex gap-4 items-center">
-          <Link href="/">
+          <Link href={user ? "/home" : "/"}>
             <span className="text-2xl">InkReads</span>
           </Link>
         </div>
