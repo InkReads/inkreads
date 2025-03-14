@@ -48,7 +48,7 @@ export default function SignupForm() {
       );
       
       alert("User created successfully!");
-      router.push("/login-page");
+      router.push("/login");
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message);
@@ -97,7 +97,7 @@ export default function SignupForm() {
       <GoogleAuthButton />
       <span className="text-base text-[#656565] mt-2">
         Have an account?
-        <Link href="/login-page" className="no-underline text-[#4D74FF] font-semibold"> Login</Link>
+        <Link href="/login" className="no-underline text-[#4D74FF] font-semibold"> Login</Link>
       </span>
     </form>
   )

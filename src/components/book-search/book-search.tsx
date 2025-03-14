@@ -1,3 +1,5 @@
+"use client";
+
 // This component is used to search for books using the Google Books API.
 // It takes an optional defaultQuery prop that can be used to set the initial search query.
 // The searchBooks function is used to fetch books based on the search query.

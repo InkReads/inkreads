@@ -18,7 +18,7 @@ export default function HeroStart() {
         size={"lg"}
         className="text-xl h-12 text-black bg-white hover:bg-[#dcdcdc]"
       >
-        <Link href="/signup-page">Get started</Link>
+        <Link href="/signup">Get started</Link>
       </Button>
     </div>
   );
