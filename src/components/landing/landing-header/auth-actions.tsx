@@ -11,7 +11,7 @@ export default function AuthActions() {
   const ProfileItems = [
     { name: "Profile", href:"/profile" },
     { name: "Settings", href:"/settings" },
-    { name: "Sign out", href:"/logout-page" },
+    { name: "Sign out", href:"/logout" },
   ]
 
   return user ? (
@@ -35,7 +35,7 @@ export default function AuthActions() {
     </DropdownMenu>
   ) : (
     <div className="flex gap-2">
-      <Button variant="default" asChild className="hidden sm:block"><Link href="/login-page">Login</Link></Button>
+      <Button variant="default" asChild className="hidden sm:block"><Link href="/login">Login</Link></Button>
     </div>
   )
 } 
