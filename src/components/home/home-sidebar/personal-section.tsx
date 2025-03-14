@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { useAuth } from "@/modules/context/auth-context";
+import { useAuth } from "@/context/auth-context";
 
 const items = [
   {

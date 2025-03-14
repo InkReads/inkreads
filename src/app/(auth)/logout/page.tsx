@@ -1,7 +1,7 @@
 "use client"
 
 import { auth } from "@/lib/firebase.config";
-import { useAuth } from "@/modules/context/auth-context";
+import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 

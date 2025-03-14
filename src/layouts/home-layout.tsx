@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import HomeNavbar from "@/modules/components/home/home-navbar";
-import HomeSidebar from "@/modules/components/home/home-sidebar";
+import HomeNavbar from "@/components/home/home-navbar/home-navbar";
+import HomeSidebar from "@/components/home/home-sidebar/home-sidebar";
 import { AuthProvider } from "../context/auth-context";
 
 interface HomeLayoutProps {
