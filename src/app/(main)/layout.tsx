@@ -1,4 +1,4 @@
-import AuthLayout from "@/layouts/auth-layout";
+import MainLayout from "@/layouts/main-layout";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -6,8 +6,8 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <AuthLayout>
+    <MainLayout>
       {children}
-    </AuthLayout>
+    </MainLayout>
   )
 }

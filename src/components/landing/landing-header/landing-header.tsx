@@ -72,7 +72,7 @@ export default function LandingHeader() {
                       className="px-4 hover:bg-muted"
                     >
                       <Link
-                        href={`/${subItem.toLowerCase().replace(" ", "")}`}
+                        href={`/genres/${subItem.toLowerCase().replace(" ", "")}`}
                       >
                         {subItem}
                       </Link>
