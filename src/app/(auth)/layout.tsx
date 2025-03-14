@@ -1,4 +1,4 @@
-import UserAuthLayout from "@/layouts/uauth-layout";
+import UserAuthLayout from "@/layouts/auth-layout";
 
 interface LayoutProps {
   children: React.ReactNode;
