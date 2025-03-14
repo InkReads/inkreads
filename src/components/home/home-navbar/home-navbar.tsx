@@ -12,6 +12,7 @@ import { DM_Sans } from "next/font/google";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SearchInput from "./search-input";
 import AuthActions from "./auth-actions";
+import { useAuth } from "@/context/auth-context";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],  
@@ -24,13 +25,15 @@ const sections = [
 ]
 
 export default function HomeNavbar() {
+  const { user } = useAuth();
+
   return (
     <nav className={`${dmSans.className} fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 bg-white shadow-md`}>
       <header className="w-full flex gap-8 items-center">
         {/* Menu and Logo */ }
         <div className="flex gap-4 items-center">
           <SidebarTrigger size={"icon"} />
-          <Link href="/">
+          <Link href={user ? "/home" : "/"}>
             <span className="text-2xl">InkReads</span>
           </Link>
         </div>
@@ -60,7 +63,7 @@ export default function HomeNavbar() {
                       className="px-4 hover:bg-muted"
                     >
                       <Link
-                        href={`/${subItem.toLowerCase().replace(" ", "")}`}
+                        href={`/genres/${subItem.toLowerCase().replace(" ", "")}`}
                       >
                         {subItem}
                       </Link>

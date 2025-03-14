@@ -28,16 +28,23 @@ export default function BookSearch({ defaultQuery = '' }: BookSearchProps) {
     const [query, setQuery] = useState<string>(defaultQuery);
     const [books, setBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     const searchBooks = async (searchQuery: string) => {
         if (!searchQuery) return;
         setLoading(true);
         try {
-            const response = await fetch(`/api/searchBooks?query=${searchQuery}`);
+            const response = await fetch(`/api/search-books?query=${encodeURIComponent(searchQuery)}`);
+            console.log('API Response:', response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
+            console.log('Books data:', data);
             setBooks(data.items || []);
         } catch (error) {
             console.error('Error fetching books:', error);
+            setError('Failed to fetch books. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -62,6 +69,9 @@ export default function BookSearch({ defaultQuery = '' }: BookSearchProps) {
                         {loading ? 'Searching...' : 'Search'}
                     </button>
                 </div>
+            )}
+            {error && (
+                <p>{error}</p>
             )}
             <ul>
                 {books.map((book) => (
