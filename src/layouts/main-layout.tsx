@@ -11,7 +11,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <AuthProvider>
       <SidebarProvider>
-        <div className="w-full">
+        <div className="w-full bg-foreground">
           <HomeNavbar />
           <div className="flex min-h-screen pt-[4rem]">
             <HomeSidebar />
