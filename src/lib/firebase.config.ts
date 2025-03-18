@@ -34,7 +34,9 @@ const saveUserProfile = async (uid: string, email: string, username: string) => 
 			uid,
 			email,
 			username,
-			readingList: []
+			readingList: [],
+			followers: [],
+			following: []
 		}, { merge: true });
 	} catch (error) {
 		console.error("Error saving user profile: ", error);
