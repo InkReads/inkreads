@@ -70,7 +70,7 @@ export default function LoginForm() {
       <GoogleAuthButton />
       <span className="text-base text-[#656565] mt-2">
         Don't have an account?
-        <Link href="/signup-page" className="no-underline text-[#4D74FF] font-semibold"> Sign up</Link>
+        <Link href="/signup" className="no-underline text-[#4D74FF] font-semibold"> Sign up</Link>
       </span>
     </form>
   )
