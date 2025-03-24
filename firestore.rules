@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow user profile operations
+    match /users/{userId} {
+      allow read: if true;  // Anyone can read user profiles
+      allow create: if true;  // Allow creating user profiles during signup
+      allow update: if request.auth != null 
+        && request.auth.uid == userId;  // Users can update their own profile
+    }
+
+    // Allow authenticated users to read and write votes
+    match /bookVotes/{bookId} {
+      allow read: if true;  // Anyone can read vote counts
+      allow write: if request.auth != null;  // Only authenticated users can vote
+    }
+    
+    match /reviewVotes/{reviewId} {
+      allow read: if true;  // Anyone can read vote counts
+      allow write: if request.auth != null;  // Only authenticated users can vote
+    }
+
+    // Base rules for other collections
+    match /{document=**} {
+      allow read: if true;  // Allow reading of all documents
+      allow write: if request.auth != null;  // Require auth for writing
+    }
+  }
+} 

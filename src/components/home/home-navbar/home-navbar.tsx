@@ -128,10 +128,10 @@ export default function HomeNavbar() {
         ) : (
           <div className="flex gap-2">
             <Button variant="default" asChild className="hidden sm:block">
-              <Link href="/login-page">Login</Link>
+              <Link href="/login">Login</Link>
             </Button>
             <Button variant="default" asChild className="hidden sm:block">
-              <Link href="/signup-page">Sign Up</Link>
+              <Link href="/signup">Sign Up</Link>
             </Button>
           </div>
         )}
