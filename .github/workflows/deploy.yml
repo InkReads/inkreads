@@ -72,11 +72,11 @@ jobs:
               npm install -g pm2
             fi
             
-            # Install Nginx if not present
+            # Install Nginx and Certbot if not present
             if ! command -v nginx &> /dev/null; then
-              sudo yum update -y
-              sudo yum install nginx -y
+              sudo amazon-linux-extras install nginx1 -y
               sudo yum install -y epel-release
+              sudo amazon-linux-extras install epel -y
               sudo yum install -y certbot python3-certbot-nginx
             fi
             
@@ -100,13 +100,14 @@ jobs:
             pm2 delete inkreads 2>/dev/null || true
             pm2 start "pnpm start" --name "inkreads"
             pm2 save
+            sudo env PATH=$PATH:/home/ec2-user/.nvm/versions/node/v20/bin pm2 startup systemd -u ec2-user --hp /home/ec2-user
             
             # Configure Nginx if not already done
             if [ ! -f /etc/nginx/conf.d/inkreads.conf ]; then
-              sudo tee /etc/nginx/conf.d/inkreads.conf << 'EOF'
+              cat << 'EOF' | sudo tee /etc/nginx/conf.d/inkreads.conf
 server {
     listen 80;
-    server_name ${{ env.DOMAIN }};
+    server_name theinkreads.com;
     
     location / {
         proxy_pass http://localhost:3000;
