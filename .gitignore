@@ -42,3 +42,9 @@ next-env.d.ts
 
 # Ignore Visual Studio files
 .vs/
+
+# Deployment
+deployment/
+*.pem
+deploy.tar.gz
+.env.production
