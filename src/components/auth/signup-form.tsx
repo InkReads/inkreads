@@ -1,16 +1,15 @@
 "use client";
 
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, saveUserProfile, db } from "@/lib/firebase.config";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SubmitHandler, useForm } from "react-hook-form";
+import Link from "next/link";
 import FormSeparator from "./form-separator";
 import GoogleAuthButton from "./google-button";
-import Link from "next/link";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db, saveUserProfile } from "@/lib/firebase.config";
-import { useRouter } from "next/navigation";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { collection, query, where, getDocs } from 'firebase/firestore';
-
 
 interface FormFieldProps {
   username: string,

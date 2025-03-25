@@ -11,8 +11,12 @@ export default function HeroStart() {
       </span>
       <span className="text-3xl">Read, storytell, and review.</span>
       <span className="text-xl hidden lg:inline-block">
-        Create reading lists and explore new titles to your mind's content.
+        Create reading lists and explore new titles to your mind&apos;s content.
       </span>
+      <p className="text-lg text-gray-600">
+        Discover and share your favorite stories. Join our community of readers and writers.
+        Don&apos;t miss out on the latest updates!
+      </p>
       <Button
         variant={"default"}
         size={"lg"}

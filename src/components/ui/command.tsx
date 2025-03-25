@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Dialog } from "@radix-ui/react-dialog"
 import { Command as CommandPrimitive } from "cmdk"
 import { cn } from "@/lib/utils"
 

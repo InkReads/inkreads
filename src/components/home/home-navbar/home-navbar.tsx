@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ChevronDownIcon } from "lucide-react";
-import { DM_Sans } from "next/font/google";
+import { dmSans } from "@/lib/fonts";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SearchInput from "./search-input";
 import { useAuth } from "@/context/auth-context";
@@ -18,11 +18,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase.config";
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],  
-  weight: "500",
-});
 
 const sections = [
   {"Community": ["Stories", "Authors", "Users"]}, 

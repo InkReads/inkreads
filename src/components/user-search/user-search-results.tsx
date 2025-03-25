@@ -5,18 +5,30 @@ import { db } from "@/lib/firebase.config";
 import { collection, query, where, getDocs, updateDoc, arrayUnion, arrayRemove, doc } from "firebase/firestore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+<<<<<<< Updated upstream
 interface User {
   id: string;
   username: string;
   email: string;
   photoURL?: string;
   // Add other user properties as needed
+=======
+interface UserSearchResult {
+  uid: string;
+  username: string;
+  email: string;
+  followers?: string[];
+}
+
+interface UserSearchResultsProps {
+  searchQuery: string;
+>>>>>>> Stashed changes
 }
 
 interface UserSearchResultsProps {
   results: User[];
 export default function UserSearchResults({ searchQuery }: UserSearchResultsProps) {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
@@ -29,8 +41,12 @@ export default function UserSearchResults({ searchQuery }: UserSearchResultsProp
         const q = query(usersRef, where("username", ">=", searchQuery), where("username", "<=", searchQuery + "\uf8ff"));
         const querySnapshot = await getDocs(q);
         const userResults = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(u => u.id !== user?.uid); // Exclude current user
+          .map(doc => ({
+            uid: doc.id,
+            username: doc.data().username,
+            email: doc.data().email
+          } as UserSearchResult))
+          .filter(u => u.uid !== user?.uid); // Exclude current user
         setUsers(userResults);
       } catch (error) {
         console.error("Error searching users:", error);
@@ -69,12 +85,12 @@ export default function UserSearchResults({ searchQuery }: UserSearchResultsProp
       
       // Refresh the users list
       setUsers(users.map(u => {
-        if (u.id === targetUserId) {
+        if (u.uid === targetUserId) {
           return {
             ...u,
             followers: isFollowing 
-              ? u.followers.filter((id: string) => id !== user.uid)
-              : [...u.followers, user.uid]
+              ? (u.followers || []).filter(id => id !== user.uid)
+              : [...(u.followers || []), user.uid]
           };
         }
         return u;
@@ -89,7 +105,7 @@ export default function UserSearchResults({ searchQuery }: UserSearchResultsProp
   return (
     <div className="flex flex-col gap-4 mt-4">
       {users.map(user => (
-        <div key={user.id} className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+        <div key={user.uid} className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
           <div className="flex items-center gap-3">
             <Avatar>
               <AvatarFallback>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -100,10 +116,10 @@ export default function UserSearchResults({ searchQuery }: UserSearchResultsProp
             </div>
           </div>
           <Button
-            onClick={() => toggleFollow(user.id, user.followers?.includes(user?.uid))}
-            variant={user.followers?.includes(user?.uid) ? "outline" : "default"}
+            onClick={() => toggleFollow(user.uid, user.followers?.includes(user?.uid ?? '') ?? false)}
+            variant={user.followers?.includes(user?.uid ?? '') ?? false ? "outline" : "default"}
           >
-            {user.followers?.includes(user?.uid) ? "Unfollow" : "Follow"}
+            {user.followers?.includes(user?.uid ?? '') ?? false ? "Unfollow" : "Follow"}
           </Button>
         </div>
       ))}

@@ -1,13 +1,11 @@
-import { ABeeZee } from "next/font/google";
 import Image from "next/image";
 import bookIcon from "@/assets/book.png";
 import notebookIcon from "@/assets/notebook.png";
+import { abeezee } from "@/lib/fonts";
 
 interface UserAuthLayout {
   children: React.ReactNode;
 }
-
-const abeezee = ABeeZee({ subsets: ["latin"], weight: ["400"] });
 
 export default function UserAuthLayout({ children }: UserAuthLayout) {
   return (

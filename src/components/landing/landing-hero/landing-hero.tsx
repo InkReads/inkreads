@@ -1,11 +1,9 @@
-import { DM_Sans } from "next/font/google";
 import HeroIntro from "./hero-intro";
 import Image from "next/image";
 import HeroImage from "@/assets/hero-image.png";
 import BGImage from "@/assets/bg-image.jpg";
 import LandingHeader from "../landing-header/landing-header";
-
-const dmSans = DM_Sans({ subsets: ['latin'] });
+import { dmSans } from "@/lib/fonts";
 
 export default function Hero() {
   return (
