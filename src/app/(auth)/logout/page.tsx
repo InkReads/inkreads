@@ -16,7 +16,7 @@ export default function Logout() {
         router.push("/");
       }, 2500)
     })
-  }, [])
+  }, [router, setUser])
 
   return (
     <div>Logging out...</div>
