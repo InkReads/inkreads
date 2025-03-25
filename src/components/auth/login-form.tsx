@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import FormSeparator from "./form-separator";
 import GoogleAuthButton from "./google-button";
 import Link from "next/link";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
@@ -15,6 +15,13 @@ interface FormFieldProps {
   username: string,
   email: string,
   password: string, 
+}
+
+interface AuthContextProps {
+  user: FirebaseUser | null;
+  username: string | null;
+  setUser: (user: FirebaseUser | null) => void;
+  setUsername: (username: string | null) => void;
 }
 
 export default function LoginForm() {
