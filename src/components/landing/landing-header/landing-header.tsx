@@ -25,6 +25,7 @@ const sections = [
 
 export default function LandingHeader() {
   const [scroll, setScroll] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleScroll = () => {
     window.scrollY > 10 ? setScroll(true) : setScroll(false);

@@ -69,7 +69,7 @@ export default function LoginForm() {
       <FormSeparator />
       <GoogleAuthButton />
       <span className="text-base text-[#656565] mt-2">
-        Don't have an account?
+        Don&apos;t have an account?
         <Link href="/signup" className="no-underline text-[#4D74FF] font-semibold"> Sign up</Link>
       </span>
     </form>

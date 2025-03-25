@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import FormSeparator from "./form-separator";
 import GoogleAuthButton from "./google-button";
 import Link from "next/link";
-import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, saveUserProfile } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
 import { collection, query, where, getDocs } from 'firebase/firestore';

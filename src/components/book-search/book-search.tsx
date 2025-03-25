@@ -3,6 +3,7 @@
 // The searchBooks function is used to fetch books based on the search query.
 // The useEffect hook is used to call the searchBooks function when the defaultQuery prop is set.
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface Book {
     id: string;
@@ -66,9 +67,13 @@ export default function BookSearch({ defaultQuery = '' }: BookSearchProps) {
                     <li key={book.id}>
                         <h2>{book.volumeInfo.title}</h2>
                         <p>{book.volumeInfo.authors?.join(', ')}</p>
-                        {book.volumeInfo.imageLinks?.thumbnail && (
-                            <img src={book.volumeInfo.imageLinks.thumbnail} alt={book.volumeInfo.title} />
-                        )}
+                        <Image 
+                            src={book.volumeInfo.imageLinks?.thumbnail || '/placeholder.png'}
+                            alt={book.volumeInfo.title}
+                            width={128}
+                            height={192}
+                            className="w-32 h-48 object-cover"
+                        />
                         <p>{book.volumeInfo.description}</p>
                     </li>
                 ))}
