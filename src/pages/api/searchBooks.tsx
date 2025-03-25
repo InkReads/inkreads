@@ -30,7 +30,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
         
         res.status(200).json(data);
+<<<<<<< Updated upstream
     } catch (err) {
         res.status(500).json({ message: 'Error fetching books', error: err.message });
+=======
+    } catch {
+        res.status(500).json({ message: 'Failed to fetch books' });
+>>>>>>> Stashed changes
     }
 }

@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
@@ -14,8 +13,24 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['books.google.com', 'lh3.googleusercontent.com'], // Add domains for next/image
-  }
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'books.google.com',
+        pathname: '/books/content/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'books.google.com',
+        pathname: '/books/content/**',
+      }
+    ],
+  },
 };
 
 export default nextConfig;

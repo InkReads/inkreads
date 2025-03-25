@@ -1,8 +1,9 @@
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
-import { SearchIcon } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Search } from "lucide-react"
+import { useEffect } from "react"
 import { db } from "@/lib/firebase.config"
-import { collection, getDocs } from "firebase/firestore"
+import { collection, query, getDocs, orderBy, startAt, endAt } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 
 interface User {
@@ -69,7 +70,7 @@ export default function SearchInput() {
     <div className="relative w-full max-w-sm">
       <form className="flex relative w-full max-w-sm items-center gap-1.5" onSubmit={handleSubmit}>
         <div className="absolute left-2.5 top-2 text-muted-foreground">
-          <SearchIcon />
+          <Search />
         </div>
         <Input
           placeholder="Search..."

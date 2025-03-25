@@ -18,8 +18,8 @@ export default function GoogleAuthButton() {
       // Save user profile to Firestore
       await saveUserProfile(
         user.uid,
-        user.email || '',
-        user.displayName || user.email?.split('@')[0] || ''
+        user.email ?? '',
+        user.displayName ?? user.email?.split('@')[0] ?? ''
       );
       
       alert("Logged in successfully!");
@@ -30,11 +30,17 @@ export default function GoogleAuthButton() {
   }
 
   return (
-    <Button type="submit" onClick={handleGoogleSignIn} className="flex justify-center items-center text-base font-bold w-[426px] h-10 bg-white hover:bg-white text-[#656565] relative shadow-none border-[1px] rounded-lg mt-3">
+    <Button 
+      type="submit" 
+      onClick={handleGoogleSignIn} 
+      className="flex justify-center items-center text-base font-bold w-[426px] h-10 bg-white hover:bg-white text-[#656565] relative shadow-none border-[1px] rounded-lg mt-3"
+    >
       <Image
         src={googleIcon}
         className="w-7 h-7 absolute left-2"
         alt="google"
+        width={28}
+        height={28}
       />
       Continue with Google
     </Button>

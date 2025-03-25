@@ -7,6 +7,7 @@ import { useAuth } from "@/context/auth-context";
 import { handleVote, getUserVotes, getVotes } from '@/lib/firebase/votes';
 import { Textarea } from "@/components/ui/textarea";
 import { addReview, getBookReviews, deleteReview, type Review } from '@/lib/firebase/reviews';
+import Image from "next/image";
 
 interface Book {
     id: string;
@@ -240,10 +241,12 @@ export default function BookPage() {
                 <div className="flex gap-8">
                     {/* Book Cover */}
                     <div className="flex-shrink-0">
-                        <img 
-                            src={book.volumeInfo.imageLinks?.thumbnail || '/placeholder-book.jpg'} 
+                        <Image
+                            src={book.volumeInfo.imageLinks?.thumbnail || '/placeholder-book.jpg'}
                             alt={book.volumeInfo.title}
-                            className="w-64 h-96 object-cover rounded-lg shadow-lg"
+                            width={300}
+                            height={450}
+                            className="rounded-lg shadow-lg"
                         />
                     </div>
                     

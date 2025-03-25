@@ -1,8 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import type { User } from "@/types/user";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -58,6 +59,26 @@ const fetchUser = async () => {
 		return userDoc.data();
 	}
 	return null;
+}
+
+export async function getUserByUsername(username: string): Promise<User | null> {
+	try {
+		const usersRef = collection(db, "users");
+		const q = query(usersRef, where("username", "==", username));
+		const querySnapshot = await getDocs(q);
+		
+		if (!querySnapshot.empty) {
+			const userData = querySnapshot.docs[0].data() as User;
+			return {
+				...userData,
+				uid: querySnapshot.docs[0].id
+			};
+		}
+		return null;
+	} catch (error) {
+		console.error("Error fetching user:", error);
+		return null;
+	}
 }
 
 export { app, auth, googleProvider, signInWithPopup, db, storage, saveUserProfile, fetchBooks, fetchUser };
