@@ -2,7 +2,8 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [ stable_server ]
+  workflow_dispatch:
 
 env:
   EC2_HOST: ${{ secrets.EC2_HOST }}
