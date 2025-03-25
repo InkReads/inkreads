@@ -350,12 +350,27 @@ export default function BookPage() {
                                                     disabled={!user}
                                                     className={`p-1 rounded-full transition-colors ${
                                                         user ? 'hover:bg-gray-100 cursor-pointer' : 'cursor-not-allowed opacity-50'
-                                                    }`}
+                                                    } ${reviewVotes[review.id] === 'upvote' ? 'text-blue-500' : 'text-gray-600'}`}
                                                     title={user ? undefined : 'Please login to vote'}
                                                 >
-                                                    <ArrowUpIcon className="w-6 h-6 text-gray-600" />
+                                                    <ArrowUpIcon className="w-6 h-6" />
                                                 </button>
                                                 <span className="text-lg font-medium">{review.upvotes}</span>
+                                            </div>
+
+                                            {/* Review Downvote */}
+                                            <div className="flex items-center gap-2">
+                                                <button 
+                                                    onClick={() => handleReviewVote(review.id, 'downvote')}
+                                                    disabled={!user}
+                                                    className={`p-1 rounded-full transition-colors ${
+                                                        user ? 'hover:bg-gray-100 cursor-pointer' : 'cursor-not-allowed opacity-50'
+                                                    } ${reviewVotes[review.id] === 'downvote' ? 'text-red-500' : 'text-gray-600'}`}
+                                                    title={user ? undefined : 'Please login to vote'}
+                                                >
+                                                    <ArrowDownIcon className="w-6 h-6" />
+                                                </button>
+                                                <span className="text-lg font-medium">{review.downvotes}</span>
                                             </div>
                                         </div>
                                     </div>
