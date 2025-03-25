@@ -72,11 +72,11 @@ jobs:
               npm install -g pm2
             fi
             
-            # Install Nginx and Certbot if not present
+            # Install Nginx if not present
             if ! command -v nginx &> /dev/null; then
-              sudo amazon-linux-extras install nginx1 -y
+              sudo yum update -y
+              sudo yum install nginx -y
               sudo yum install -y epel-release
-              sudo amazon-linux-extras install epel -y
               sudo yum install -y certbot python3-certbot-nginx
             fi
             
@@ -90,36 +90,34 @@ jobs:
             tar -xzf /home/ec2-user/deploy.tar.gz
             rm /home/ec2-user/deploy.tar.gz
             
-            # Handle pnpm lockfile and install dependencies
-            rm -f pnpm-lock.yaml
-            rm -rf node_modules
-            pnpm install --no-frozen-lockfile
+            # Install dependencies and build
+            pnpm install
             pnpm run build
             
             # Configure PM2
             pm2 delete inkreads 2>/dev/null || true
-            pm2 start "pnpm start" --name "inkreads"
+            pm2 start pnpm --name "inkreads" -- start
             pm2 save
             sudo env PATH=$PATH:/home/ec2-user/.nvm/versions/node/v20/bin pm2 startup systemd -u ec2-user --hp /home/ec2-user
             
             # Configure Nginx if not already done
             if [ ! -f /etc/nginx/conf.d/inkreads.conf ]; then
-              sudo bash -c 'cat > /etc/nginx/conf.d/inkreads.conf << EOL
-server {
-    listen 80;
-    server_name theinkreads.com;
-    
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
-    }
-}
-EOL'
-
+              sudo tee /etc/nginx/conf.d/inkreads.conf > /dev/null << EOF
+              server {
+                  listen 80;
+                  server_name ${{ env.DOMAIN }};
+                  
+                  location / {
+                      proxy_pass http://localhost:3000;
+                      proxy_http_version 1.1;
+                      proxy_set_header Upgrade \$http_upgrade;
+                      proxy_set_header Connection 'upgrade';
+                      proxy_set_header Host \$host;
+                      proxy_cache_bypass \$http_upgrade;
+                  }
+              }
+              EOF
+              
               sudo rm -f /etc/nginx/conf.d/default.conf
               sudo systemctl start nginx
               sudo systemctl enable nginx
