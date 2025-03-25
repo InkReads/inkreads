@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
@@ -16,20 +15,17 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'books.google.com',
-        pathname: '/books/content/**',
+        hostname: 'lh3.googleusercontent.com',
       },
       {
         protocol: 'https',
-        hostname: 'books.google.com',
-        pathname: '/books/content/**',
-      }
+        hostname: 'firebasestorage.googleapis.com',
+      },
     ],
+  },
+  optimizeFonts: true,
+  experimental: {
+    optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
   },
 };
 
