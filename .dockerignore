@@ -1,0 +1,24 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js build output
+.next
+
+# Misc
+.git
+.env.local
+.env.development
+README.md
+*.log
+.DS_Store
+coverage
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Deployment
+deployment/
+*.pem 
