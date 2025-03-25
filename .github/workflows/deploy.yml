@@ -104,7 +104,7 @@ jobs:
             
             # Configure Nginx if not already done
             if [ ! -f /etc/nginx/conf.d/inkreads.conf ]; then
-              cat << 'EOF' | sudo tee /etc/nginx/conf.d/inkreads.conf
+              sudo bash -c 'cat > /etc/nginx/conf.d/inkreads.conf << EOL
 server {
     listen 80;
     server_name theinkreads.com;
@@ -112,13 +112,13 @@ server {
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
     }
 }
-EOF
+EOL'
 
               sudo rm -f /etc/nginx/conf.d/default.conf
               sudo systemctl start nginx
