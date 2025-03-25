@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import HomeLayout from '../../layouts/home-layout';
-import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
+import { ArrowUpIcon, ArrowDownIcon, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { handleVote, getUserVotes, getVotes } from '@/lib/firebase/votes';
+import { Textarea } from "@/components/ui/textarea";
+import { addReview, getBookReviews, deleteReview, type Review } from '@/lib/firebase/reviews';
 
 interface Book {
     id: string;
@@ -22,16 +24,6 @@ interface Book {
         pageCount?: number;
         publisher?: string;
     };
-}
-
-interface Review {
-    id: string;
-    userId: string;
-    username: string;
-    content: string;
-    date: string;
-    upvotes: number;
-    downvotes: number;
 }
 
 // Helper function to clean HTML from text
@@ -53,6 +45,10 @@ export default function BookPage() {
     const [userVote, setUserVote] = useState<'upvote' | 'downvote' | null>(null);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [reviewVotes, setReviewVotes] = useState<Record<string, 'upvote' | 'downvote' | null>>({});
+    const [isWritingReview, setIsWritingReview] = useState(false);
+    const [reviewContent, setReviewContent] = useState('');
+    const [hasMoreReviews, setHasMoreReviews] = useState(false);
+    const [loadingReviews, setLoadingReviews] = useState(false);
 
     const handleBookVote = async (voteType: 'upvote' | 'downvote') => {
         if (!book || !user) return;
@@ -110,6 +106,57 @@ export default function BookPage() {
         }
     };
 
+    const handleSubmitReview = async () => {
+        if (!user || !book || !reviewContent.trim()) return;
+
+        try {
+            const newReview = {
+                userId: user.uid,
+                username: user.displayName || 'Anonymous',
+                content: reviewContent.trim(),
+                date: new Date().toISOString(), // Store as ISO string for proper ordering
+                bookId: book.id,
+                upvotes: 0,
+                downvotes: 0
+            };
+
+            const savedReview = await addReview(newReview);
+            setReviews(prev => [savedReview, ...prev]);
+            setReviewContent('');
+            setIsWritingReview(false);
+        } catch (error) {
+            console.error('Error submitting review:', error);
+        }
+    };
+
+    const loadMoreReviews = async () => {
+        if (!book || loadingReviews) return;
+
+        try {
+            setLoadingReviews(true);
+            const lastReview = reviews[reviews.length - 1];
+            const { reviews: newReviews, hasMore } = await getBookReviews(book.id, lastReview);
+            
+            setReviews(prev => [...prev, ...newReviews]);
+            setHasMoreReviews(hasMore);
+        } catch (error) {
+            console.error('Error loading more reviews:', error);
+        } finally {
+            setLoadingReviews(false);
+        }
+    };
+
+    const handleDeleteReview = async (reviewId: string) => {
+        if (!user) return;
+        
+        try {
+            await deleteReview(reviewId);
+            setReviews(prev => prev.filter(review => review.id !== reviewId));
+        } catch (error) {
+            console.error('Error deleting review:', error);
+        }
+    };
+
     useEffect(() => {
         const fetchBookAndReviews = async () => {
             if (!id) return;
@@ -140,21 +187,10 @@ export default function BookPage() {
                 };
                 setBook(bookWithVotes);
 
-                // For now, using example review data
-                const exampleReviewId = '1';
-                const reviewVoteData = await getVotes('review', exampleReviewId);
-                
-                setReviews([
-                    {
-                        id: exampleReviewId,
-                        userId: '123',
-                        username: 'John Doe',
-                        content: "This book was absolutely amazing! The character development was superb, and the plot twists kept me on the edge of my seat. I couldn't put it down until I finished it. The author's writing style is engaging and the world-building is incredible. Highly recommend this to anyone looking for a great read!",
-                        date: 'March 15, 2024',
-                        upvotes: reviewVoteData.upvoters.length,
-                        downvotes: reviewVoteData.downvoters.length
-                    }
-                ]);
+                // Fetch initial reviews
+                const { reviews: initialReviews, hasMore } = await getBookReviews(bookData.id);
+                setReviews(initialReviews);
+                setHasMoreReviews(hasMore);
 
                 // Fetch user's existing votes if logged in
                 if (user) {
@@ -163,7 +199,7 @@ export default function BookPage() {
                     setUserVote(bookVotes[bookData.id]);
 
                     // Get review votes
-                    const reviewIds = [exampleReviewId]; // Replace with actual review IDs when implementing real reviews
+                    const reviewIds = initialReviews.map(review => review.id);
                     const reviewVotesData = await getUserVotes('review', reviewIds, user.uid);
                     setReviewVotes(reviewVotesData);
                 }
@@ -260,12 +296,33 @@ export default function BookPage() {
                             {user && (
                                 <Button 
                                     className="bg-blue-600 hover:bg-blue-700"
-                                    onClick={() => router.push(`/book/${id}/review`)}
+                                    onClick={() => setIsWritingReview(!isWritingReview)}
                                 >
-                                    Write a Review
+                                    {isWritingReview ? 'Cancel Review' : 'Write a Review'}
                                 </Button>
                             )}
                         </div>
+
+                        {/* Review Writing Section */}
+                        {isWritingReview && (
+                            <div className="mt-6 space-y-4">
+                                <Textarea
+                                    placeholder="Write your review here..."
+                                    value={reviewContent}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReviewContent(e.target.value)}
+                                    className="min-h-[150px] p-4"
+                                />
+                                <div className="flex justify-end">
+                                    <Button
+                                        onClick={handleSubmitReview}
+                                        disabled={!reviewContent.trim()}
+                                        className="bg-blue-600 hover:bg-blue-700"
+                                    >
+                                        Submit Review
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -275,46 +332,58 @@ export default function BookPage() {
                     <div className="space-y-6">
                         {reviews.map(review => (
                             <div key={review.id} className="bg-white p-6 rounded-lg shadow">
-                                <div className="flex items-center gap-6 mb-4">
-                                    <span className="text-gray-500">
-                                        by {review.username} • {review.date}
-                                    </span>
-                                    {/* Review Voting System */}
+                                <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-6">
-                                        {/* Review Upvote */}
-                                        <div className="flex items-center gap-2">
-                                            <button 
-                                                onClick={() => handleReviewVote(review.id, 'upvote')}
-                                                disabled={!user}
-                                                className={`p-1 rounded-full transition-colors ${
-                                                    user ? 'hover:bg-gray-100 cursor-pointer' : 'cursor-not-allowed opacity-50'
-                                                }`}
-                                                title={user ? undefined : 'Please login to vote'}
-                                            >
-                                                <ArrowUpIcon className="w-6 h-6 text-gray-600" />
-                                            </button>
-                                            <span className="text-lg font-medium">{review.upvotes}</span>
-                                        </div>
-
-                                        {/* Review Downvote */}
-                                        <div className="flex items-center gap-2">
-                                            <button 
-                                                onClick={() => handleReviewVote(review.id, 'downvote')}
-                                                disabled={!user}
-                                                className={`p-1 rounded-full transition-colors ${
-                                                    user ? 'hover:bg-gray-100 cursor-pointer' : 'cursor-not-allowed opacity-50'
-                                                }`}
-                                                title={user ? undefined : 'Please login to vote'}
-                                            >
-                                                <ArrowDownIcon className="w-6 h-6 text-gray-600" />
-                                            </button>
-                                            <span className="text-lg font-medium">{review.downvotes}</span>
+                                        <span className="text-gray-500">
+                                            by {review.username} • {new Date(review.date).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </span>
+                                        {/* Review Voting System */}
+                                        <div className="flex items-center gap-6">
+                                            {/* Review Upvote */}
+                                            <div className="flex items-center gap-2">
+                                                <button 
+                                                    onClick={() => handleReviewVote(review.id, 'upvote')}
+                                                    disabled={!user}
+                                                    className={`p-1 rounded-full transition-colors ${
+                                                        user ? 'hover:bg-gray-100 cursor-pointer' : 'cursor-not-allowed opacity-50'
+                                                    }`}
+                                                    title={user ? undefined : 'Please login to vote'}
+                                                >
+                                                    <ArrowUpIcon className="w-6 h-6 text-gray-600" />
+                                                </button>
+                                                <span className="text-lg font-medium">{review.upvotes}</span>
+                                            </div>
                                         </div>
                                     </div>
+                                    {user && user.uid === review.userId && (
+                                        <button
+                                            onClick={() => handleDeleteReview(review.id)}
+                                            className="p-2 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-full transition-colors"
+                                            title="Delete review"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    )}
                                 </div>
                                 <p className="text-gray-700">{review.content}</p>
                             </div>
                         ))}
+                        
+                        {hasMoreReviews && (
+                            <div className="flex justify-center mt-6">
+                                <Button
+                                    onClick={loadMoreReviews}
+                                    disabled={loadingReviews}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                    {loadingReviews ? 'Loading...' : 'Show More Reviews'}
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
