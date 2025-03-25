@@ -2,7 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: ["stable_server"]
+    branches: [ stable_server ]
+  pull_request:
+    branches: [ stable_server ]
 
 jobs:
   build:
@@ -10,16 +12,24 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [20.x]
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
-      - run: pnpm ci --legacy-peer-deps
-      - run: pnpm run build --if-present
-      - run: pm2 restart example
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install --no-strict-peer-dependencies
+      
+    - name: Build
+      run: pnpm run build
+      
