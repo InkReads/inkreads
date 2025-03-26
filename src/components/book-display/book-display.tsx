@@ -1,76 +1,98 @@
 "use client";
 
-import { useState } from 'react';
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+// This component is used to search for a book using the Google Books API.
+// It takes an optional defaultQuery prop that can be used to set the initial search query.
+// The searchBooks function is used to fetch books based on the search query.
+// The useEffect hook is used to call the searchBooks function when the defaultQuery prop is set.
+import { useState, useEffect } from "react";
+import BookCard from "./book-card";
+import { getVotes } from "@/lib/firebase/votes";
 
 interface Book {
   id: string;
   volumeInfo: {
     title: string;
     authors: string[];
-    publishedDate: string;
-    description: string;
+    imageLinks: {
+      thumbnail: string;
+    };
+    upvotes?: number;
+    description?: string;
+    publishedDate?: string;
   };
 }
 
 interface BookDisplayProps {
-  initialBooks: Book[];
-  genreLabel: string;
+  defaultQuery?: string;
 }
 
-export function BookDisplay({ initialBooks, genreLabel }: BookDisplayProps) {
-  const [books] = useState<Book[]>(initialBooks);
+export default function BookDisplay({ defaultQuery = "" }: BookDisplayProps) {
+  const [query, setQuery] = useState<string>(defaultQuery);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const searchBooks = async (searchQuery: string) => {
+    if (!searchQuery) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/search-book?q=${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch books');
+      }
+      const data = await response.json();
+
+      // Fetch vote counts for each book
+      const booksWithVotes = await Promise.all(
+        (data.items || []).map(async (book: Book) => {
+          const voteData = await getVotes("book", book.id);
+          return {
+            ...book,
+            volumeInfo: {
+              ...book.volumeInfo,
+              upvotes: voteData.upvoters.length,
+            },
+          };
+        })
+      );
+
+      setBooks(booksWithVotes);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getBookCoverUrl = (bookId: string) => {
     return `https://books.google.com/books/publisher/content/images/frontcover/${bookId}?fife=w400-h600&source=gbs_api`;
   };
 
-  if (books.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground">No books found</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (defaultQuery) {
+      searchBooks(defaultQuery);
+    }
+  }, [defaultQuery]);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-      {books.map((book) => (
-        <Card 
-          key={book.id} 
-          className="group relative border-none shadow-md hover:shadow-xl transition-all duration-300 bg-card"
-        >
-          <div className="space-y-3">
-            <div className="aspect-[2/3] w-full overflow-hidden rounded-lg">
-              <img 
-                src={getBookCoverUrl(book.id)}
-                alt={book.volumeInfo.title}
-                className="h-full w-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder-book.jpg';
-                }}
-              />
-            </div>
-            <CardContent className="space-y-2 p-3">
-              <Badge variant="secondary" className="text-xs font-normal">
-                {genreLabel}
-              </Badge>
-              <h3 className="font-semibold leading-tight line-clamp-2 text-sm">
-                {book.volumeInfo.title}
-              </h3>
-              <p className="text-xs text-muted-foreground line-clamp-1">
-                {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}
-              </p>
-            </CardContent>
-          </div>
-        </Card>
-      ))}
+    <div className="space-y-6">
+      {loading ? (
+        <div className="text-center py-8">Loading books...</div>
+      ) : (
+        <div className="space-y-4">
+          {books.map((book) => (
+            <BookCard
+              key={book.id}
+              id={book.id}
+              title={book.volumeInfo.title}
+              authors={book.volumeInfo.authors || []}
+              thumbnail={getBookCoverUrl(book.id)}
+              upvotes={book.volumeInfo.upvotes}
+              description={book.volumeInfo.description}
+              publishedDate={book.volumeInfo.publishedDate}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
-} 
+}

@@ -5,8 +5,8 @@ import { GENRES } from "./[genre]/page";
 
 export default function GenresPage() {
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-8">Browse by Genre</h1>
+    <div className="container mx-auto p-4 py-8">
+      <h1 className="text-4xl font-bold mb-8 text-center">Browse by Genre</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {Object.entries(GENRES).map(([slug, { title, description }]) => (
           <Link
