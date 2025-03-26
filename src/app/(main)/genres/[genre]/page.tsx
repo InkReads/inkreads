@@ -1,4 +1,4 @@
-import BookDisplay from "@/components/book-display/book-display";
+import BookDisplay from "@/components/books/multiple-book-display/book-display";
 import { notFound } from "next/navigation";
 
 const GENRES = {

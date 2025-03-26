@@ -1,9 +1,5 @@
 "use client";
 
-// This component is used to search for a book using the Google Books API.
-// It takes an optional defaultQuery prop that can be used to set the initial search query.
-// The searchBooks function is used to fetch books based on the search query.
-// The useEffect hook is used to call the searchBooks function when the defaultQuery prop is set.
 import { useState, useEffect } from "react";
 import BookCard from "./book-card";
 import { getVotes } from "@/lib/firebase/votes";
@@ -27,7 +23,6 @@ interface BookDisplayProps {
 }
 
 export default function BookDisplay({ defaultQuery = "" }: BookDisplayProps) {
-  const [query, setQuery] = useState<string>(defaultQuery);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
