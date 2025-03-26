@@ -1,36 +1,17 @@
+import { ReactNode } from "react";
 import Image from "next/image";
-import bookIcon from "@/assets/book.png";
-import notebookIcon from "@/assets/notebook.png";
-import { abeezee } from "@/lib/fonts";
+import { systemFonts } from "@/lib/fonts";
 
 interface UserAuthLayout {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export default function UserAuthLayout({ children }: UserAuthLayout) {
+export default function AuthLayout({ children }: UserAuthLayout) {
   return (
-    <div className={`${abeezee.className} flex justify-center h-screen`}>
-      <div className="flex items-center gap-4">
-        <Image
-          className="hidden lg:block pt-[26rem]"
-          src={notebookIcon}
-          alt="book"
-          width={198}
-          height={198}
-        />
-        <div className="flex flex-col items-center">
-          <p className="text-xl">Get started with</p>
-          <p className="text-[40px]">InkReads</p>
-          {children}
-        </div>
-        <Image
-          className="hidden lg:block pb-96"
-          src={bookIcon}
-          alt="book"
-          width={209}
-          height={171}
-        />
+    <div style={{ fontFamily: systemFonts.sans }} className="flex justify-center h-screen">
+      <div className="flex flex-col items-center justify-center w-full max-w-md px-4">
+        {children}
       </div>
     </div>
-  )
+  );
 }
