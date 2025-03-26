@@ -2,6 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// This interface extends React.TextareaHTMLAttributes<HTMLTextAreaElement>
+// to inherit all standard textarea properties while allowing for custom styling
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 

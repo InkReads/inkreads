@@ -10,13 +10,17 @@ export default function Logout() {
   const { setUser } = useAuth();  
 
   useEffect(() => {
+    handleSignOut();
+  }, [router, setUser]);
+
+  const handleSignOut = () => {
     auth.signOut().then(() => {
       setUser(null);
       setTimeout(() => {
         router.push("/");
       }, 2500)
     })
-  }, [])
+  }
 
   return (
     <div>Logging out...</div>
