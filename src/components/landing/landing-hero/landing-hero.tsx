@@ -1,21 +1,29 @@
-import HeroIntro from "./hero-intro";
 import Image from "next/image";
-import HeroImage from "@/assets/hero-image.png";
-import BGImage from "@/assets/bg-image.jpg";
-import LandingHeader from "../landing-header/landing-header";
-import { dmSans } from "@/lib/fonts";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { systemFonts } from "@/lib/fonts";
 
-export default function Hero() {
+export default function LandingHero() {
   return (
-    <section 
-      className={`${dmSans.className} relative flex w-full justify-center items-center h-screen`}
+    <div
+      style={{ fontFamily: systemFonts.sans }}
+      className="relative flex w-full justify-center items-center h-screen"
     >
-      <LandingHeader />
-      <Image src={BGImage} alt="bg-image" quality={100} className="absolute top-0 -z-10 brightness-[0.5] h-full w-full" />
-      <div className="max-w-5xl flex justify-evenly items-center gap-40">
-        <HeroIntro />
-        <Image src={HeroImage} alt="hero-image" height={450} className="rounded-xl object-cover hidden lg:inline-block"/>
+      <div className="flex flex-col items-center gap-6 text-center">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
+          Your next favorite book awaits.
+        </h1>
+        <p className="text-lg sm:text-xl md:text-2xl text-gray-600 max-w-2xl">
+          Join our community of book lovers. Share your thoughts, discover new reads, and connect with fellow bibliophiles.
+        </p>
+        <Link href="/signup">
+          <Button size="lg" className="text-lg">
+            Get Started
+            <ArrowRight className="ml-2" />
+          </Button>
+        </Link>
       </div>
-    </section>
+    </div>
   );
 }
