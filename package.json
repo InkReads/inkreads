@@ -21,10 +21,11 @@
     "cmdk": "^1.1.1",
     "firebase": "^11.3.0",
     "lucide-react": "^0.474.0",
-    "next": "14.1.0",
+    "next": "^14.2.26",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.54.2",
+    "sharp": "^0.33.5",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7"
   },
