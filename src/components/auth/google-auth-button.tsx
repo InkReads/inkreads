@@ -2,15 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "@/lib/firebase.config";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
+import { auth, db } from "@/lib/firebase.config";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase.config";
+import { useRouter } from "next/navigation";
 
 export function GoogleAuthButton() {
   const router = useRouter();
-  const { setUser } = useAuth();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -18,31 +15,25 @@ export function GoogleAuthButton() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Create a username from email
-      const username = user.email?.split('@')[0] || 'user';
-
       // Save user profile to Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        username,
+      await setDoc(doc(db, "users", user.uid), {
         email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
+        username: user.displayName || user.email?.split('@')[0],
         createdAt: new Date().toISOString(),
-      }, { merge: true });
+      });
 
-      setUser(user);
-      router.push('/home');
+      router.push("/novels");
     } catch (error) {
-      console.error('Error signing in with Google:', error);
+      console.error("Error signing in with Google:", error);
+      alert("Failed to sign in with Google. Please try again.");
     }
   };
 
   return (
     <Button
-      type="button"
-      variant="outline"
-      className="w-full"
       onClick={handleGoogleSignIn}
+      variant="outline"
+      className="w-[420px] sm:w-[521px] h-10 text-xl rounded-lg border-2 border-[#4D74FF] text-[#4D74FF] hover:bg-[#4D74FF] hover:text-white"
     >
       Continue with Google
     </Button>

@@ -1,37 +1,52 @@
-import { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/auth-context";
+"use client";
+
+import { useState, useEffect } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase.config";
-import { collection, query, where, getDocs, updateDoc, arrayUnion, arrayRemove, doc } from "firebase/firestore";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/context/auth-context";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { UserPlus, UserMinus } from "lucide-react";
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 interface User {
   id: string;
   username: string;
   email: string;
-  // Add other user properties as needed
+  followers?: string[];
+  following?: string[];
 }
 
-interface UserSearchResultsProps {
-  searchQuery: string;
-}
-
-export default function UserSearchResults({ searchQuery }: UserSearchResultsProps) {
+export default function UserSearchResults({ searchQuery }: { searchQuery: string }) {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const { user: currentUser } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const searchUsers = async () => {
-      if (!searchQuery) return;
-      setLoading(true);
+      if (!searchQuery.trim()) {
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
+
       try {
+        setLoading(true);
         const usersRef = collection(db, "users");
-        const q = query(usersRef, where("username", ">=", searchQuery), where("username", "<=", searchQuery + "\uf8ff"));
+        const q = query(
+          usersRef,
+          where("username", ">=", searchQuery),
+          where("username", "<=", searchQuery + "\uf8ff")
+        );
+
         const querySnapshot = await getDocs(q);
         const userResults = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(u => u.id !== user?.uid); // Exclude current user
+          .map(doc => ({ 
+            id: doc.id, 
+            ...doc.data() 
+          } as User))
+          .filter(u => u.id !== currentUser?.uid); // Exclude current user
         setUsers(userResults);
       } catch (error) {
         console.error("Error searching users:", error);
@@ -41,71 +56,112 @@ export default function UserSearchResults({ searchQuery }: UserSearchResultsProp
     };
 
     searchUsers();
-  }, [searchQuery, user]);
+  }, [searchQuery, currentUser?.uid]);
 
-  const toggleFollow = async (targetUserId: string, isFollowing: boolean) => {
-    if (!user) return;
-    
+  const handleFollow = async (userId: string) => {
+    if (!currentUser) {
+      router.push("/login");
+      return;
+    }
+
     try {
-      const currentUserRef = doc(db, "users", user.uid);
-      const targetUserRef = doc(db, "users", targetUserId);
+      const userRef = doc(db, "users", currentUser.uid);
+      const targetUserRef = doc(db, "users", userId);
 
-      if (isFollowing) {
-        // Unfollow
-        await updateDoc(currentUserRef, {
-          following: arrayRemove(targetUserId)
-        });
-        await updateDoc(targetUserRef, {
-          followers: arrayRemove(user.uid)
-        });
-      } else {
-        // Follow
-        await updateDoc(currentUserRef, {
-          following: arrayUnion(targetUserId)
-        });
-        await updateDoc(targetUserRef, {
-          followers: arrayUnion(user.uid)
-        });
-      }
-      
-      // Refresh the users list
-      setUsers(users.map(u => {
-        if (u.id === targetUserId) {
-          return {
-            ...u,
-            followers: isFollowing 
-              ? u.followers.filter((id: string) => id !== user.uid)
-              : [...u.followers, user.uid]
-          };
-        }
-        return u;
-      }));
+      await updateDoc(userRef, {
+        following: arrayUnion(userId)
+      });
+
+      await updateDoc(targetUserRef, {
+        followers: arrayUnion(currentUser.uid)
+      });
+
+      // Update local state
+      setUsers(prevUsers =>
+        prevUsers.map(u =>
+          u.id === userId
+            ? { ...u, followers: [...(u.followers || []), currentUser.uid] }
+            : u
+        )
+      );
     } catch (error) {
-      console.error("Error toggling follow:", error);
+      console.error("Error following user:", error);
     }
   };
 
-  if (loading) return <div>Searching...</div>;
+  const handleUnfollow = async (userId: string) => {
+    if (!currentUser) return;
+
+    try {
+      const userRef = doc(db, "users", currentUser.uid);
+      const targetUserRef = doc(db, "users", userId);
+
+      await updateDoc(userRef, {
+        following: arrayRemove(userId)
+      });
+
+      await updateDoc(targetUserRef, {
+        followers: arrayRemove(currentUser.uid)
+      });
+
+      // Update local state
+      setUsers(prevUsers =>
+        prevUsers.map(u =>
+          u.id === userId
+            ? {
+                ...u,
+                followers: u.followers?.filter(id => id !== currentUser.uid)
+              }
+            : u
+        )
+      );
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-4">Loading...</div>;
+  }
+
+  if (users.length === 0) {
+    return <div className="text-center py-4">No users found</div>;
+  }
 
   return (
-    <div className="flex flex-col gap-4 mt-4">
-      {users.map(user => (
-        <div key={user.id} className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarFallback>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-semibold">{user.username}</h3>
-              <p className="text-sm text-gray-500">{user.followers?.length || 0} followers</p>
-            </div>
+    <div className="space-y-4">
+      {users.map((user) => (
+        <div
+          key={user.id}
+          className="flex items-center justify-between p-4 bg-white rounded-lg shadow"
+        >
+          <div>
+            <h3 className="font-semibold">{user.username}</h3>
+            <p className="text-sm text-gray-500">{user.email}</p>
           </div>
-          <Button
-            onClick={() => toggleFollow(user.id, user.followers?.includes(user?.uid))}
-            variant={user.followers?.includes(user?.uid) ? "outline" : "default"}
-          >
-            {user.followers?.includes(user?.uid) ? "Unfollow" : "Follow"}
-          </Button>
+          {user.id !== currentUser?.uid && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                user.followers?.includes(currentUser?.uid || "")
+                  ? handleUnfollow(user.id)
+                  : handleFollow(user.id)
+              }
+            >
+              {user.followers?.includes(currentUser?.uid || "") ? (
+                <>
+                  <UserMinus className="w-4 h-4 mr-2" />
+                  Unfollow
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Follow
+                </>
+              )}
+            </Button>
+          )}
         </div>
       ))}
     </div>

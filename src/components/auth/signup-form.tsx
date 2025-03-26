@@ -1,22 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase.config";
-import { doc, setDoc } from "firebase/firestore";
-import { FormSeparator } from "@/components/auth/form-separator";
+import FormSeparator from "@/components/auth/form-separator";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import Link from "next/link";
-import { collection, query, where, getDocs } from 'firebase/firestore';
-
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 
 interface FormFieldProps {
   username: string,
@@ -24,12 +17,19 @@ interface FormFieldProps {
   password: string, 
 }
 
+const saveUserProfile = async (uid: string, email: string, username: string) => {
+  await setDoc(doc(db, "users", uid), {
+    email,
+    username,
+    createdAt: new Date().toISOString(),
+  });
+};
+
 export default function SignupForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormFieldProps>();
   const router = useRouter();
 
-
-  const handleSignup: SubmitHandler<FormFieldProps> = async (data) => {
+  const handleSignup = async (data: FormFieldProps) => {
     try {
       const { email, password, username } = data;
       
@@ -44,7 +44,6 @@ export default function SignupForm() {
       }
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);      
-
 
       // Save user profile to Firestore
       await saveUserProfile(
