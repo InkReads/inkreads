@@ -4,6 +4,7 @@ import { useEffect, useState, createContext, useContext } from "react";
 import { auth, db } from "@/lib/firebase.config";
 import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { useRouter, usePathname } from "next/navigation";
 
 interface AuthContextProps {
   user: FirebaseUser | null;
@@ -26,6 +27,8 @@ const AuthContext = createContext<AuthContextProps>({
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -37,13 +40,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const userData = userDoc.data();
           setUsername(userData.username);
         }
+
+        // Redirect to novels page if on auth-related pages
+        if (pathname === '/login' || pathname === '/signup') {
+          router.push('/novels');
+        }
       } else {
         setUser(null);
         setUsername(null);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [pathname]);
 
   return (
     <AuthContext.Provider value={{ user, username, setUser, setUsername }}>
