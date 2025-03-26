@@ -5,12 +5,19 @@ import { db } from "@/lib/firebase.config";
 import { collection, query, where, getDocs, updateDoc, arrayUnion, arrayRemove, doc } from "firebase/firestore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  // Add other user properties as needed
+}
+
 interface UserSearchResultsProps {
   searchQuery: string;
 }
 
 export default function UserSearchResults({ searchQuery }: UserSearchResultsProps) {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 

@@ -10,9 +10,9 @@ export default function HeroStart() {
         <span className="font-medium">InkReads.</span>
       </span>
       <span className="text-3xl">Read, storytell, and review.</span>
-      <span className="text-xl hidden lg:inline-block">
-        Create reading lists and explore new titles to your mind's content.
-      </span>
+      <p className="text-xl hidden lg:inline-block text-gray-300">
+        Create reading lists and explore new titles to your mind&apos;s content.
+      </p>
       <Button
         variant={"default"}
         size={"lg"}

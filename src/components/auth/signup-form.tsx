@@ -1,14 +1,20 @@
 "use client";
 
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SubmitHandler, useForm } from "react-hook-form";
-import FormSeparator from "./form-separator";
-import GoogleAuthButton from "./google-button";
-import Link from "next/link";
-import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { auth, db, saveUserProfile } from "@/lib/firebase.config";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, db } from "@/lib/firebase.config";
+import { doc, setDoc } from "firebase/firestore";
+import { FormSeparator } from "@/components/auth/form-separator";
+import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import Link from "next/link";
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
 
