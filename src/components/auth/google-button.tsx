@@ -23,7 +23,7 @@ export default function GoogleAuthButton() {
       );
       
       alert("Logged in successfully!");
-      router.push('/');
+      router.push('/novels');
     } catch (error) {
       console.error("Google Sign-In Error:", error);
     }
