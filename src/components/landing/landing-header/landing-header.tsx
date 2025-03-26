@@ -27,7 +27,7 @@ export default function LandingHeader() {
   const [scroll, setScroll] = useState<boolean>(false);
 
   const handleScroll = () => {
-    window.scrollY > 10 ? setScroll(true) : setScroll(false);
+    setScroll(window.scrollY > 10);
   }
 
   useEffect(() => {
