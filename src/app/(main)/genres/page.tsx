@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { GENRES } from "./[genre]/page";
+import { GENRES } from "./constants";
 
 export default function GenresPage() {
   return (

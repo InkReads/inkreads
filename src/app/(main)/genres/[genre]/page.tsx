@@ -1,34 +1,6 @@
 import BookDisplay from "@/components/books/multiple-book-display/book-display";
 import { notFound } from "next/navigation";
-
-const GENRES = {
-  lightnovels: {
-    title: "Light Novels",
-    query: "light novel",
-    description: "Explore Japanese light novels and their translations"
-  },
-  novels: {
-    title: "Novels",
-    query: "novel",
-    description: "Discover traditional novels across all genres"
-  },
-  comics: {
-    title: "Comics",
-    query: "comic",
-    description: "Browse comics, graphic novels, and manga"
-  },
-  fanfiction: {
-    title: "Fanfiction",
-    query: "fanfiction",
-    description: "Read fan-created stories from your favorite universes"
-  }
-} as const;
-
-// Type for valid genre slugs
-type GenreSlug = keyof typeof GENRES;
-
-// Export GENRES for use in other components
-export { GENRES };
+import { GENRES, GenreSlug } from "../constants";
 
 // Generate static params for all valid genres
 export function generateStaticParams() {
@@ -40,9 +12,9 @@ export function generateStaticParams() {
 export default async function GenrePage({ 
   params 
 }: { 
-  params: Promise<{ genre: string }> 
+  params: { genre: string } 
 }) {
-  const { genre } = await params;
+  const { genre } = params;
 
   if (!isValidGenre(genre)) {
     notFound();

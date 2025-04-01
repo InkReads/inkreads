@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase.config";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
@@ -15,8 +14,8 @@ interface UserProfile {
   following: string[];
 }
 
-export default function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
-  const { username } = use(params);
+export default function UserProfilePage({ params }: { params: { username: string } }) {
+  const { username } = params;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
