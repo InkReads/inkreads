@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     });
     return () => unsubscribe();
-  }, [pathname]);
+  }, [pathname, router]);
 
   return (
     <AuthContext.Provider value={{ user, username, setUser, setUsername }}>

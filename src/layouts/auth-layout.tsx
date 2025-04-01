@@ -1,7 +1,11 @@
+"use client";
+
 import { ABeeZee } from "next/font/google";
 import Image from "next/image";
 import bookIcon from "@/assets/book.png";
 import notebookIcon from "@/assets/notebook.png";
+import { useAuth } from "@/context/auth-context";
+import { redirect } from "next/navigation";
 
 interface UserAuthLayout {
   children: React.ReactNode;
@@ -10,6 +14,12 @@ interface UserAuthLayout {
 const abeezee = ABeeZee({ subsets: ["latin"], weight: ["400"] });
 
 export default function UserAuthLayout({ children }: UserAuthLayout) {
+  const { user } = useAuth();
+
+  if (user && window.location.pathname !== "/logout") {
+    redirect("/home");
+  }
+
   return (
     <div className={`${abeezee.className} flex justify-center h-screen`}>
       <div className="flex items-center gap-4">
