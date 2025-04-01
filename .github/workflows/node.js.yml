@@ -2,9 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ home-feed ]
   pull_request:
-    branches: [ main ]
+    branches: [ home-feed ]
 
 jobs:
   build:
@@ -31,5 +31,8 @@ jobs:
       run: pnpm install --no-strict-peer-dependencies
       
     - name: Build
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
       run: pnpm run build
       
