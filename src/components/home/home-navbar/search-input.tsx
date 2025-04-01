@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input"
 import { SearchIcon } from "lucide-react"
 import { useState, useEffect } from "react"
 import { db } from "@/lib/firebase.config"
-import { collection, query, where, getDocs, orderBy, startAt, endAt } from "firebase/firestore"
+import { collection, query, getDocs, orderBy, startAt, endAt } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 
 interface User {

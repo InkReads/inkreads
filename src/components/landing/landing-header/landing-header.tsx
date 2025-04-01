@@ -29,7 +29,7 @@ export default function LandingHeader() {
   const { user } = useAuth();
 
   const handleScroll = () => {
-    window.scrollY > 10 ? setScroll(true) : setScroll(false);
+    setScroll(window.scrollY > 10);
   }
 
   useEffect(() => {
