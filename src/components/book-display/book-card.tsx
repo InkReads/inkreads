@@ -1,5 +1,6 @@
 import { ArrowUpIcon } from "lucide-react";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 interface BookCardProps {
     id: string;
@@ -46,11 +47,14 @@ export default function BookCard({
             onClick={handleClick}
         >
             {/* Book Cover */}
-            <div className="flex-shrink-0">
-                <img
+            <div className="flex-shrink-0 relative w-32 h-48">
+                <Image
                     src={thumbnail}
                     alt={title}
-                    className="w-32 h-48 object-cover rounded-md shadow-sm"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover rounded-md shadow-sm"
+                    priority
                 />
             </div>
             
