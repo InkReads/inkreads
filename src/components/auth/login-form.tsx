@@ -10,6 +10,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase.config";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import { useState } from "react";
 
 interface FormFieldProps {
   username: string,
@@ -21,15 +22,18 @@ export default function LoginForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormFieldProps>();
   const { setUser } = useAuth();
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleLogin: SubmitHandler<FormFieldProps> = async (data) => {
+    if (isRedirecting) return;
+    
     const { email, password } = data;
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
       console.log("User signed in :" + userCredential.user);
-      alert("Login successful!");
-      router.push("/novels");
+      setIsRedirecting(true);
+      router.replace("/home");
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message);
@@ -38,6 +42,10 @@ export default function LoginForm() {
       }
     }
   };
+
+  if (isRedirecting) {
+    return null;
+  }
 
   return (
     <form className="flex flex-col justify-center items-center" onSubmit={handleSubmit(handleLogin)}>
@@ -62,7 +70,7 @@ export default function LoginForm() {
           type="password" 
         />
         {errors.password && <span className="text-red-500">{errors.password.message}</span>}
-        <Button disabled={isSubmitting} type="submit" className="text-xl rounded-lg bg-[#4D74FF] hover:bg-[#4D74FF]">
+        <Button disabled={isSubmitting || isRedirecting} type="submit" className="text-xl rounded-lg bg-[#4D74FF] hover:bg-[#4D74FF]">
           {isSubmitting ? "Loading..." : "Continue"}
         </Button>
       </div>

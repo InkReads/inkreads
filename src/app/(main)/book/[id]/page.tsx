@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import { useAuth } from "@/context/auth-context";
 import { handleVote } from "@/lib/firebase/votes";
 import BookDisplay from "@/components/books/single-book-display/book-display";
@@ -12,13 +11,11 @@ export default function BookPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ data?: string }>;
+  params: { id: string };
+  searchParams: { data?: string };
 }) {
-  const resolvedParams = use(params);
-  const resolvedSearchParams = use(searchParams);
   const { user } = useAuth();
-  const { book, loading, error, setBook } = useBook(resolvedParams.id, resolvedSearchParams.data);
+  const { book, loading, error, setBook } = useBook(params.id, searchParams.data);
   
   const {
     reviews,
@@ -33,7 +30,7 @@ export default function BookPage({
     handleReviewVote,
     handleDeleteReview,
     loadMoreReviews
-  } = useReviews(resolvedParams.id);
+  } = useReviews(params.id);
 
   const handleBookVote = async (voteType: "upvote" | "downvote") => {
     if (!book || !user) return;

@@ -27,31 +27,39 @@ const AuthContext = createContext<AuthContextProps>({
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setIsLoading(true);
       if (user) {
         setUser(user);
-        // Fetch the user's profile data from Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUsername(userData.username);
         }
-
-        // Redirect to novels page if on auth-related pages
-        if (pathname === '/login' || pathname === '/signup') {
-          router.push('/novels');
-        }
       } else {
         setUser(null);
         setUsername(null);
       }
+      setIsLoading(false);
     });
+
     return () => unsubscribe();
-  }, [pathname, router]);
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && user && (pathname === '/login' || pathname === '/signup')) {
+      router.replace('/home');
+    }
+  }, [user, pathname, router, isLoading]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <AuthContext.Provider value={{ user, username, setUser, setUsername }}>
