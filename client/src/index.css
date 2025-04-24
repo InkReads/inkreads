@@ -1,3 +1,9 @@
+@import 'tw-animate-css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: 'ABeeZee';
   src: url('@/assets/fonts/ABeeZee-Regular.ttf');
@@ -7,11 +13,6 @@
   font-family: 'DM Sans';
   src: url('@/assets/fonts/DMSans_18pt-Regular.ttf');
 }
-
-@import "tailwindcss";
-@tailwind utilities;
-
-@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
