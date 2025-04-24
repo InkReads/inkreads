@@ -4,8 +4,6 @@ import {
   doc, 
   getDoc, 
   updateDoc, 
-  arrayUnion, 
-  arrayRemove,
   collection,
   setDoc,
   deleteDoc,
@@ -16,13 +14,10 @@ import {
   getDocs,
   startAfter
 } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import HomeLayout from '@/components/layouts/HomeLayout';
-import HomeNavbar from '@/components/HomeNavbar';
-import BookDisplay from '@/components/books/BookDisplay';
-import BookReviews from '@/components/books/BookReviews';
 import { useAuthStore } from '@/store/authStore';
-import { Star, ThumbsUp, ThumbsDown, Calendar, Clock, Share2, BookOpen, MessageSquare, Bookmark, Award } from 'lucide-react';
+import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getBookById } from '@/lib/api';
 
@@ -330,7 +325,6 @@ export default function BookDetails() {
   if (loading) {
     return (
       <HomeLayout>
-        <HomeNavbar />
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white animate-pulse">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col lg:flex-row gap-12">
@@ -354,7 +348,6 @@ export default function BookDetails() {
   if (error || !book) {
     return (
       <HomeLayout>
-        <HomeNavbar />
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center py-16">
@@ -373,7 +366,6 @@ export default function BookDetails() {
 
   return (
     <HomeLayout>
-      <HomeNavbar />
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
         {/* Hero Section with Blur Effect */}
         <div className="relative overflow-hidden">

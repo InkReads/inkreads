@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { GENRES, type GenreSlug } from '@/components/constants';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import BookCard from '@/components/books/BookCard';
-import { Loader2, BookOpen, RefreshCcw, Sparkles, Library } from 'lucide-react';
+import { Loader2, RefreshCcw, Sparkles, Library } from 'lucide-react';
 import { searchBooks } from '@/lib/api';
 
 interface Book {
