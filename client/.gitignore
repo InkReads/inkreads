@@ -32,3 +32,7 @@ dist-ssr
 .next/
 tsconfig.tsbuildinfo
 next-env.d.ts
+
+# Cache
+.vercel
+.env*.local
