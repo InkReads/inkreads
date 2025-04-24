@@ -50,53 +50,63 @@ jobs:
         
     - name: Setup environment variables
       run: |
-        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > server/.env
-        echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> server/.env
-        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> client/.env
+        # Server environment variables
+        cd server
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+        echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> .env
+        
+        # Client environment variables
+        cd ../client
+        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env
         
     - name: Setup Python environment
       run: |
         cd server
-        # Create virtual environment if it doesn't exist
         python3 -m venv venv || true
-        # Activate virtual environment and install dependencies
         source venv/bin/activate
         pip install -r requirements.txt
         
-    - name: Stop PM2 processes
+    - name: Stop existing processes
       run: |
+        echo "Stopping all PM2 processes..."
         pm2 delete all || true
+        echo "Checking no processes are running..."
+        pm2 list
         
-    - name: Start PM2 processes
+    - name: Start Flask API server
       run: |
-        # Start Flask API with Gunicorn
+        echo "Starting Flask API with Gunicorn..."
         cd server
         source venv/bin/activate
+        echo "Python version: $(python3 --version)"
+        echo "Gunicorn version: $(gunicorn --version)"
         pm2 start --name api "$(which gunicorn) --bind 0.0.0.0:5001 --workers 4 --access-logfile - app:app"
+        echo "API server started. Checking status..."
+        pm2 list
+        curl -v http://localhost:5001 || true
         
-        # Start client
-        cd ../client && pm2 serve dist 3000 --name client --spa
-        
-    - name: Check SELinux
+    - name: Start React client
       run: |
-        # Check if SELinux is installed and enabled
-        if command -v getenforce &> /dev/null; then
-          echo "SELinux status: $(getenforce)"
-          # Temporarily set SELinux to permissive mode if it's enforcing
-          if [ "$(getenforce)" = "Enforcing" ]; then
-            sudo setenforce 0 || true
-            echo "Set SELinux to permissive mode"
-          fi
-        else
-          echo "SELinux is not installed"
-        fi
+        echo "Starting React client..."
+        cd client
+        pm2 start --name client "npm run preview -- --port 3000" --cwd ./
+        echo "Client started. Checking status..."
+        pm2 list
+        curl -v http://localhost:3000 || true
+        
+    - name: Save PM2 configuration
+      run: |
+        echo "Saving PM2 process list..."
+        pm2 save
+        echo "Current PM2 processes:"
+        pm2 list
         
     - name: Setup Nginx configuration
       run: |
         # Create necessary directories with correct permissions
         sudo mkdir -p /var/log/nginx
         sudo mkdir -p /var/lib/nginx
-        sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+        sudo mkdir -p /etc/nginx/conf.d
         
         # Set proper permissions
         sudo chown -R nginx:nginx /var/log/nginx
@@ -104,51 +114,46 @@ jobs:
         sudo chmod 755 /var/log/nginx
         sudo chmod 755 /var/lib/nginx
         
+        # Copy our nginx configuration to the correct location
+        sudo cp .nginx/inkreads.conf /etc/nginx/conf.d/example.conf
+        sudo chmod 644 /etc/nginx/conf.d/example.conf
+        
         # Remove default nginx site if it exists
-        sudo rm -f /etc/nginx/sites-enabled/default
-        
-        # Copy our nginx configuration
-        sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
-        sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
-        
-        # Set proper permissions for the configuration
-        sudo chown -R root:root /etc/nginx/sites-available
-        sudo chown -R root:root /etc/nginx/sites-enabled
-        sudo chmod 644 /etc/nginx/sites-available/inkreads.conf
+        sudo rm -f /etc/nginx/conf.d/default.conf
         
         # Test nginx configuration
         sudo nginx -t
         
-        # Stop nginx if it's running
+        # Restart nginx
         sudo systemctl stop nginx || sudo service nginx stop || true
-        
-        # Start nginx with proper permissions
         sudo systemctl start nginx || sudo service nginx start
         
-    - name: Verify services
+    - name: Verify all services
       run: |
-        echo "Checking PM2 processes..."
+        echo "1. Checking PM2 processes..."
         pm2 list
         
-        echo "Checking Python version and location..."
-        cd server && source venv/bin/activate
-        which python3
-        python3 --version
-        which gunicorn
+        echo "2. Checking ports in use..."
+        sudo netstat -tlpn | grep -E ':80|:443|:3000|:5001'
         
-        echo "Checking API logs..."
-        pm2 logs api --lines 10 || true
+        echo "3. Testing API server..."
+        curl -v http://localhost:5001/api || true
         
-        echo "Checking Nginx status..."
+        echo "4. Testing client server..."
+        curl -v http://localhost:3000 || true
+        
+        echo "5. Checking Nginx status..."
         sudo systemctl status nginx || sudo service nginx status
-        sudo cat /var/log/nginx/error.log || true
         
-        echo "Checking API endpoint..."
-        curl -I https://theinkreads.com/api || true
+        echo "6. Checking Nginx configuration..."
+        sudo nginx -T
         
-        echo "Checking main site..."
-        curl -I https://theinkreads.com || true
+        echo "7. Checking Nginx logs..."
+        sudo tail -n 50 /var/log/nginx/error.log || true
         
     - name: Complete job
       run: |
-        echo "Deployment completed successfully" 
+        echo "Deployment completed successfully"
+        echo "You can now access:"
+        echo "- Main site: https://theinkreads.com"
+        echo "- API: https://theinkreads.com/api" 
