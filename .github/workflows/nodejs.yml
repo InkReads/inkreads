@@ -43,7 +43,6 @@ jobs:
     needs: build
     runs-on: [self-hosted, example2]
  
-    
     steps:
     - name: Pull latest changes
       run: |
@@ -59,11 +58,26 @@ jobs:
       run: |
         sudo certbot renew --quiet
         
-    - name: Restart PM2 processes
+    - name: Stop PM2 processes
       run: |
-        pm2 restart all || pm2 start ecosystem.config.js
+        pm2 delete all || true
+        
+    - name: Start PM2 processes
+      run: |
+        cd server && pm2 start app.py --name api --interpreter python3
+        cd ../client && pm2 serve dist 3000 --name client --spa
+        
+    - name: Update Nginx configuration
+      run: |
+        sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
+        sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
+        sudo nginx -t && sudo systemctl restart nginx || sudo service nginx restart
         
     - name: Verify deployment
       run: |
         pm2 list
-        curl -I ${{ secrets.VITE_API_URL }} || true 
+        curl -I https://inkreads.henrytran.dev || true 
+        
+    - name: Complete job
+      run: |
+        echo "Deployment completed successfully" 
