@@ -69,11 +69,10 @@ jobs:
         
     - name: Start PM2 processes
       run: |
-        # Start Flask API with virtual environment python
+        # Start Flask API with Gunicorn
         cd server
         source venv/bin/activate
-        which python3  # Debug: show which python3 is being used
-        pm2 start --name api "$(which python3) app.py"
+        pm2 start --name api "$(which gunicorn) --bind 0.0.0.0:5001 --workers 4 --access-logfile - app:app"
         
         # Start client
         cd ../client && pm2 serve dist 3000 --name client --spa
@@ -135,6 +134,7 @@ jobs:
         cd server && source venv/bin/activate
         which python3
         python3 --version
+        which gunicorn
         
         echo "Checking API logs..."
         pm2 logs api --lines 10 || true
