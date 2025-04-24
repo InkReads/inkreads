@@ -12,12 +12,15 @@ import {
   orderBy,
   limit,
   getDocs,
-  startAfter
+  startAfter,
+  arrayRemove as firestoreArrayRemove,
+  arrayUnion as firestoreArrayUnion
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import { useAuthStore } from '@/store/authStore';
 import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award } from 'lucide-react';
+import { BookOpen as LucideBookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getBookById } from '@/lib/api';
 
@@ -218,23 +221,23 @@ export default function BookDetails() {
       if (voteType === 'upvote') {
         if (review.upvotes.includes(userId)) {
           await updateDoc(reviewRef, {
-            upvotes: arrayRemove(userId)
+            upvotes: firestoreArrayRemove(userId)
           });
         } else {
           await updateDoc(reviewRef, {
-            upvotes: arrayUnion(userId),
-            downvotes: arrayRemove(userId)
+            upvotes: firestoreArrayUnion(userId),
+            downvotes: firestoreArrayRemove(userId)
           });
         }
       } else {
         if (review.downvotes.includes(userId)) {
           await updateDoc(reviewRef, {
-            downvotes: arrayRemove(userId)
+            downvotes: firestoreArrayRemove(userId)
           });
         } else {
           await updateDoc(reviewRef, {
-            downvotes: arrayUnion(userId),
-            upvotes: arrayRemove(userId)
+            downvotes: firestoreArrayUnion(userId),
+            upvotes: firestoreArrayRemove(userId)
           });
         }
       }
@@ -449,7 +452,7 @@ export default function BookDetails() {
                   </div>
                   <div className="bg-white rounded-xl p-4 shadow-sm">
                     <div className="flex items-center gap-3 text-gray-600">
-                      <BookOpen className="w-5 h-5 text-indigo-500" />
+                      <LucideBookOpen className="w-5 h-5 text-indigo-500" />
                       <div>
                         <p className="text-sm text-gray-500">Read Time</p>
                         <p className="font-semibold">5h 23m</p>
