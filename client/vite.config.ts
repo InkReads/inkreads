@@ -13,9 +13,17 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5001',
         changeOrigin: true
       }
-    }
+    },
+    host: true,
+    port: 3000
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 3000,
+    strictPort: true,
+    allowedHosts: ['theinkreads.com', 'www.theinkreads.com']
   }
 })

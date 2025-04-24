@@ -89,7 +89,7 @@ jobs:
       run: |
         echo "Starting React client..."
         cd client
-        pm2 start --name client "npm run preview -- --port 3000" --cwd ./
+        pm2 start --name client "pnpm preview --host 0.0.0.0 --port 3000" --cwd ./
         echo "Client started. Checking status..."
         pm2 list
         curl -v http://localhost:3000 || true
