@@ -69,8 +69,15 @@ jobs:
         
     - name: Update Nginx configuration
       run: |
-        sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
-        sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
+        # Check if sites-available exists (Ubuntu-style)
+        if [ -d "/etc/nginx/sites-available" ]; then
+          sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
+          sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
+        else
+          # Amazon Linux-style
+          sudo cp .nginx/inkreads.conf /etc/nginx/conf.d/inkreads.conf
+        fi
+        # Test and restart Nginx
         sudo nginx -t && sudo systemctl restart nginx || sudo service nginx restart
         
     - name: Verify deployment
