@@ -4,6 +4,7 @@ import { GENRES, type GenreSlug } from '@/components/constants';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import BookCard from '@/components/books/BookCard';
 import { Loader2, BookOpen, RefreshCcw, Sparkles, Library } from 'lucide-react';
+import { searchBooks } from '@/lib/api';
 
 interface Book {
   id: string;
@@ -34,14 +35,8 @@ export default function GenrePage() {
         setLoading(true);
         setError(null);
         const query = genreInfo.query;
-        
-        const response = await fetch(`/api/books?q=${encodeURIComponent(query)}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch books');
-        }
-        const data = await response.json();
-        setBooks(data.items || []);
+        const books = await searchBooks(query);
+        setBooks(books);
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch books');
         console.error('Error fetching books:', error);
