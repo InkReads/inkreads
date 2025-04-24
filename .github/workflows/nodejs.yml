@@ -54,10 +54,6 @@ jobs:
         echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> .env
         echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
         
-    - name: Renew SSL certificate
-      run: |
-        sudo certbot renew --quiet
-        
     - name: Stop PM2 processes
       run: |
         pm2 delete all || true
@@ -71,10 +67,12 @@ jobs:
       run: |
         # Check if sites-available exists (Ubuntu-style)
         if [ -d "/etc/nginx/sites-available" ]; then
+          sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
           sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
           sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
         else
           # Amazon Linux-style
+          sudo mkdir -p /etc/nginx/conf.d
           sudo cp .nginx/inkreads.conf /etc/nginx/conf.d/inkreads.conf
         fi
         # Test and restart Nginx
@@ -83,7 +81,7 @@ jobs:
     - name: Verify deployment
       run: |
         pm2 list
-        curl -I https://inkreads.henrytran.dev || true 
+        curl -I http://inkreads.henrytran.dev || true 
         
     - name: Complete job
       run: |
