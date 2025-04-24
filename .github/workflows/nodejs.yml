@@ -1,0 +1,67 @@
+name: Node.js CI & Deployment
+
+on:
+  push:
+    branches: [ main, feat/migrate-react-flask ]
+  pull_request:
+    branches: [ main, feat/migrate-react-flask ]
+
+jobs:
+  build:
+    runs-on: [self-hosted, example2]
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install --no-strict-peer-dependencies
+      
+    - name: Build
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
+        VITE_API_URL: ${{ secrets.VITE_API_URL }}
+      run: pnpm run build
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, example2]
+ 
+    
+    steps:
+    - name: Pull latest changes
+      run: |
+        git pull origin ${{ github.ref }}
+        
+    - name: Setup environment variables
+      run: |
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+        echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> .env
+        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+        
+    - name: Renew SSL certificate
+      run: |
+        sudo certbot renew --quiet
+        
+    - name: Restart PM2 processes
+      run: |
+        pm2 restart all || pm2 start ecosystem.config.js
+        
+    - name: Verify deployment
+      run: |
+        pm2 list
+        curl -I ${{ secrets.VITE_API_URL }} || true 
