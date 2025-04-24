@@ -50,9 +50,18 @@ jobs:
         
     - name: Setup environment variables
       run: |
-        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
-        echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> .env
-        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > server/.env
+        echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> server/.env
+        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> client/.env
+        
+    - name: Setup Python environment
+      run: |
+        cd server
+        # Create virtual environment if it doesn't exist
+        python3 -m venv venv || true
+        # Activate virtual environment and install dependencies
+        source venv/bin/activate
+        pip install -r requirements.txt
         
     - name: Stop PM2 processes
       run: |
@@ -60,13 +69,41 @@ jobs:
         
     - name: Start PM2 processes
       run: |
-        cd server && pm2 start app.py --name api --interpreter python3
+        # Start Flask API with virtual environment python
+        cd server
+        source venv/bin/activate
+        which python3  # Debug: show which python3 is being used
+        pm2 start --name api "$(which python3) app.py"
+        
+        # Start client
         cd ../client && pm2 serve dist 3000 --name client --spa
+        
+    - name: Check SELinux
+      run: |
+        # Check if SELinux is installed and enabled
+        if command -v getenforce &> /dev/null; then
+          echo "SELinux status: $(getenforce)"
+          # Temporarily set SELinux to permissive mode if it's enforcing
+          if [ "$(getenforce)" = "Enforcing" ]; then
+            sudo setenforce 0 || true
+            echo "Set SELinux to permissive mode"
+          fi
+        else
+          echo "SELinux is not installed"
+        fi
         
     - name: Setup Nginx configuration
       run: |
-        # Ensure nginx directories exist
+        # Create necessary directories with correct permissions
+        sudo mkdir -p /var/log/nginx
+        sudo mkdir -p /var/lib/nginx
         sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+        
+        # Set proper permissions
+        sudo chown -R nginx:nginx /var/log/nginx
+        sudo chown -R nginx:nginx /var/lib/nginx
+        sudo chmod 755 /var/log/nginx
+        sudo chmod 755 /var/lib/nginx
         
         # Remove default nginx site if it exists
         sudo rm -f /etc/nginx/sites-enabled/default
@@ -75,19 +112,36 @@ jobs:
         sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
         sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
         
+        # Set proper permissions for the configuration
+        sudo chown -R root:root /etc/nginx/sites-available
+        sudo chown -R root:root /etc/nginx/sites-enabled
+        sudo chmod 644 /etc/nginx/sites-available/inkreads.conf
+        
         # Test nginx configuration
         sudo nginx -t
         
-        # Restart nginx
-        sudo systemctl restart nginx || sudo service nginx restart
+        # Stop nginx if it's running
+        sudo systemctl stop nginx || sudo service nginx stop || true
+        
+        # Start nginx with proper permissions
+        sudo systemctl start nginx || sudo service nginx start
         
     - name: Verify services
       run: |
         echo "Checking PM2 processes..."
         pm2 list
         
+        echo "Checking Python version and location..."
+        cd server && source venv/bin/activate
+        which python3
+        python3 --version
+        
+        echo "Checking API logs..."
+        pm2 logs api --lines 10 || true
+        
         echo "Checking Nginx status..."
         sudo systemctl status nginx || sudo service nginx status
+        sudo cat /var/log/nginx/error.log || true
         
         echo "Checking API endpoint..."
         curl -I https://theinkreads.com/api || true
