@@ -8,12 +8,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { ChevronDownIcon } from 'lucide-react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+// import { SidebarTrigger } from '@/components/ui/sidebar';
+import SearchInput from '@/components/SearchInput';
 
 const NAVIGATION_SECTIONS = [
   { "Community": ["Stories", "Authors", "Users"] },
@@ -28,15 +29,15 @@ interface NavDropdownProps {
   section: typeof NAVIGATION_SECTIONS[number];
 }
 
-export default function Navbar() {
+export default function HomeNavbar() {
   const { user } = useAuthStore();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 shadow-md font-dmSans tracking-wider">
+    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-white shadow-sm">
       <header className="w-full flex gap-8 items-center">
         {/* Logo Section */}
-        <div className="flex gap-4 items-center">
-          {user && <SidebarTrigger size={"icon"} />}
+        <div className="flex gap-3 items-center">
+          {/** user && <SidebarTrigger className="hover:cursor-pointer" /> **/}
           <Link to="/">
             <span className="text-2xl">InkReads</span>
           </Link>
@@ -44,13 +45,14 @@ export default function Navbar() {
       </header>
 
       {/* Navigation and Auth Section */}
-      <section className="inline-flex items-center">
+      <section className="flex items-center">
+        <SearchInput /> 
         <div className="flex justify-between mx-2">
           {NAVIGATION_SECTIONS.map((section, index) => (
             <NavDropdown key={index} section={section} />
           ))}
         </div>
-        {user ? <UserMenu /> : <AuthButtons />}
+        {user ? <UserMenu /> : <AuthActions />}
       </section>
     </nav>
   );
@@ -62,15 +64,15 @@ function NavDropdown({ section }: NavDropdownProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="focus:outline-none text-inherit">
-        <div className="hidden lg:block items-center cursor-pointer hover:text-gray-600">
+      <DropdownMenuTrigger asChild className="focus:outline-none text-inherit hover:cursor-pointer">
+        <div className="hidden lg:block items-center">
           <Button variant="ghost">
             {title}
             <ChevronDownIcon className="w-4 h-4 ml-1" />
           </Button>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-[#f3f4f6] border-[#e5e7eb] shadow-md">
+      <DropdownMenuContent className="bg-white border-[#e5e7eb] shadow-md">
         <div className="flex flex-col">
           {items.map((item: string, index: number) => (
             <Button 
@@ -91,7 +93,7 @@ function NavDropdown({ section }: NavDropdownProps) {
 }
 
 function UserMenu() {
-  const { user, userData, setUser } = useAuthStore();
+  const { userData, setUser } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -112,17 +114,16 @@ function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="cursor-pointer">
+      <DropdownMenuTrigger asChild className="hover:cursor-pointer">
         <Avatar>
           <AvatarFallback>
-            {userData?.username?.substring(0, 2).toUpperCase() || 
-             user?.email?.substring(0, 2).toUpperCase()}
+            {userData?.username?.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuLabel>
-          {userData?.username || user?.email}
+      <DropdownMenuContent align="end" className="bg-white border-[#e5e7eb] shadow-md">
+        <DropdownMenuLabel className="font-bold">
+          {userData?.username}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="w-full ml-0 bg-gray-300"/>
         <section className="flex flex-col items-start">
@@ -146,7 +147,7 @@ function UserMenu() {
   );
 }
 
-function AuthButtons() {
+function AuthActions() {
   return (
     <div className="flex gap-2">
       <Button variant="link" asChild className="hidden sm:block">

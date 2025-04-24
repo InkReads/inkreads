@@ -8,7 +8,7 @@ interface AuthCheckProps {
 }
 
 export default function AuthCheck({ children, requireAuth = true }: AuthCheckProps) {
-  const { user, loading, fetchUserData } = useAuthStore();
+  const { user, loading } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,16 +19,22 @@ export default function AuthCheck({ children, requireAuth = true }: AuthCheckPro
       } else if (!requireAuth && user) {
         // Redirect to home if user is logged in but trying to access auth pages
         navigate('/');
-      } else if (user) {
-        // Fetch user data when user is authenticated
-        fetchUserData();
       }
     }
-  }, [user, loading, requireAuth, navigate, fetchUserData]);
+  }, [user, loading, requireAuth, navigate]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
-  return <>{children}</>;
+  // Only render children if authentication requirements are met
+  if ((requireAuth && user) || (!requireAuth && !user)) {
+    return <>{children}</>;
+  }
+
+  return null;
 } 
