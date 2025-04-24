@@ -63,25 +63,37 @@ jobs:
         cd server && pm2 start app.py --name api --interpreter python3
         cd ../client && pm2 serve dist 3000 --name client --spa
         
-    - name: Update Nginx configuration
+    - name: Setup Nginx configuration
       run: |
-        # Check if sites-available exists (Ubuntu-style)
-        if [ -d "/etc/nginx/sites-available" ]; then
-          sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
-          sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
-          sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
-        else
-          # Amazon Linux-style
-          sudo mkdir -p /etc/nginx/conf.d
-          sudo cp .nginx/inkreads.conf /etc/nginx/conf.d/inkreads.conf
-        fi
-        # Test and restart Nginx
-        sudo nginx -t && sudo systemctl restart nginx || sudo service nginx restart
+        # Ensure nginx directories exist
+        sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
         
-    - name: Verify deployment
+        # Remove default nginx site if it exists
+        sudo rm -f /etc/nginx/sites-enabled/default
+        
+        # Copy our nginx configuration
+        sudo cp .nginx/inkreads.conf /etc/nginx/sites-available/inkreads.conf
+        sudo ln -sf /etc/nginx/sites-available/inkreads.conf /etc/nginx/sites-enabled/inkreads.conf
+        
+        # Test nginx configuration
+        sudo nginx -t
+        
+        # Restart nginx
+        sudo systemctl restart nginx || sudo service nginx restart
+        
+    - name: Verify services
       run: |
+        echo "Checking PM2 processes..."
         pm2 list
-        curl -I http://inkreads.henrytran.dev || true 
+        
+        echo "Checking Nginx status..."
+        sudo systemctl status nginx || sudo service nginx status
+        
+        echo "Checking API endpoint..."
+        curl -I https://theinkreads.com/api || true
+        
+        echo "Checking main site..."
+        curl -I https://theinkreads.com || true
         
     - name: Complete job
       run: |
