@@ -24,6 +24,7 @@ import BookReviews from '@/components/books/BookReviews';
 import { useAuthStore } from '@/store/authStore';
 import { Star, ThumbsUp, ThumbsDown, Calendar, Clock, Share2, BookOpen, MessageSquare, Bookmark, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getBookById } from '@/lib/api';
 
 interface BookVolumeInfo {
   title: string;
@@ -97,9 +98,7 @@ export default function BookDetails() {
         }
 
         // Otherwise fetch from API and Firestore
-        const response = await fetch(`/api/books?id=${id}`);
-        if (!response.ok) throw new Error('Failed to fetch book');
-        const apiData = await response.json();
+        const apiData = await getBookById(id);
 
         // Check Firestore for votes
         const bookRef = doc(db, 'books', id);
