@@ -1,7 +1,7 @@
 import { User } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUpIcon, ArrowDownIcon, ThumbsUpIcon, ThumbsDownIcon } from 'lucide-react';
+import { ThumbsUpIcon, ThumbsDownIcon } from 'lucide-react';
 
 interface BookDisplayProps {
   book: {
