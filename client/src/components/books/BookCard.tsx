@@ -28,6 +28,14 @@ export default function BookCard({
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  console.log('BookCard props for:', title, {
+    id,
+    genre_tags,
+    genre_tags_type: typeof genre_tags,
+    is_array: Array.isArray(genre_tags),
+    length: genre_tags?.length
+  });
+
   const getHighQualityThumbnail = (url: string) => {
     if (!url) return "/placeholder-book.png";
     if (url.includes("googleusercontent.com")) {
@@ -154,7 +162,7 @@ export default function BookCard({
           )}
 
           {/* Genre Tags */}
-          {genre_tags && genre_tags.length > 0 && (
+          {Array.isArray(genre_tags) && genre_tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {genre_tags.slice(0, 3).map((tag, index) => (
                 <span

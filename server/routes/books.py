@@ -45,25 +45,32 @@ def get_book():
             return jsonify({'error': 'Book not found'}), 404
             
         data = response.json()
+        logger.info(f"📚 Raw response data structure: {list(data.keys())}")
         
         # Add genre tags to the response under volumeInfo
         if 'items' in data:
             logger.info(f"📚 Processing {len(data['items'])} books")
             for item in data['items']:
                 book_id = item['id']
-                logger.info(f"🏷️ Getting genre tags for book: {book_id}")
+                title = item.get('volumeInfo', {}).get('title', 'Unknown Title')
+                logger.info(f"🏷️ Processing book: {book_id} - {title}")
+                logger.info(f"📖 Initial volumeInfo structure: {list(item.get('volumeInfo', {}).keys())}")
+                
                 genre_tags = get_or_generate_genre_tags(book_id, item)
                 if 'volumeInfo' not in item:
                     item['volumeInfo'] = {}
                 item['volumeInfo']['genre_tags'] = genre_tags
-                logger.info(f"✅ Added {len(genre_tags)} genre tags to book {book_id}: {genre_tags}")
+                logger.info(f"✅ Added genre tags to book {book_id}: {genre_tags}")
+                logger.info(f"📖 Final volumeInfo structure: {list(item.get('volumeInfo', {}).keys())}")
+                logger.debug(f"📖 Full book data after adding tags: {item}")
         elif 'id' in data:
-            logger.info(f"🏷️ Getting genre tags for single book: {data['id']}")
+            logger.info(f"🏷️ Getting genre tags for single book: {data['id']} - {data.get('volumeInfo', {}).get('title', 'Unknown Title')}")
             genre_tags = get_or_generate_genre_tags(data['id'], data)
             if 'volumeInfo' not in data:
                 data['volumeInfo'] = {}
             data['volumeInfo']['genre_tags'] = genre_tags
-            logger.info(f"✅ Added {len(genre_tags)} genre tags: {genre_tags}")
+            logger.info(f"✅ Added genre tags: {genre_tags}")
+            logger.debug(f"📖 Full book data after adding tags: {data}")
             
         logger.info(f"✨ Successfully processed {len(data.get('items', [1]))} books")
         return jsonify(data)
