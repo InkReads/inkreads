@@ -86,6 +86,12 @@ export default function GenrePage() {
     try {
       setRefreshing(true);
       const freshBooks = await searchBooks(genreInfo.query);
+      console.log(`Fresh books from API for genre ${genre}:`, freshBooks.map((book: Book) => ({
+        id: book.id,
+        title: book.volumeInfo.title,
+        volumeInfo_keys: Object.keys(book.volumeInfo),
+        genre_tags: book.volumeInfo.genre_tags
+      })));
       return freshBooks;
     } catch (error) {
       console.error('Error fetching fresh books:', error);
@@ -95,6 +101,26 @@ export default function GenrePage() {
     }
   };
 
+  // Function to clear cache for testing
+  /*
+  const clearCache = async () => {
+    if (!genre) return;
+    try {
+      const cacheRef = collection(db, 'genre_cache');
+      const q = query(cacheRef, where('genre', '==', genre));
+      const querySnapshot = await getDocs(q);
+      
+      const deletePromises = querySnapshot.docs.map(doc => 
+        deleteDoc(doc.ref)
+      );
+      
+      await Promise.all(deletePromises);
+      console.log('Cache cleared for genre:', genre);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+    }
+  };
+*/
   // Main fetch function that orchestrates cached and fresh loads
   useEffect(() => {
     async function fetchBooks() {
@@ -106,6 +132,12 @@ export default function GenrePage() {
 
         // First, try to load cached books
         const cachedBooks = await fetchCachedBooks();
+        console.log(`Cached books for genre ${genre}:`, cachedBooks.map((book: Book) => ({
+          id: book.id,
+          title: book.volumeInfo.title,
+          volumeInfo_keys: Object.keys(book.volumeInfo),
+          genre_tags: book.volumeInfo.genre_tags
+        })));
         if (cachedBooks.length > 0) {
           setBooks(cachedBooks);
           setLoading(false);
@@ -117,14 +149,31 @@ export default function GenrePage() {
           // Merge fresh books with cached books, preferring fresh data but keeping cached genre tags
           const mergedBooks = freshBooks.map((freshBook: Book) => {
             const cachedBook = cachedBooks.find(cached => cached.id === freshBook.id);
-            return {
+            const mergedBook = {
               ...freshBook,
               volumeInfo: {
                 ...freshBook.volumeInfo,
                 genre_tags: cachedBook?.volumeInfo.genre_tags || freshBook.volumeInfo.genre_tags
               }
             };
+            console.log('Merged book details:', {
+              id: mergedBook.id,
+              title: mergedBook.volumeInfo.title,
+              volumeInfo_keys: Object.keys(mergedBook.volumeInfo),
+              genre_tags: mergedBook.volumeInfo.genre_tags,
+              from_cache: !!cachedBook,
+              cached_tags: cachedBook?.volumeInfo.genre_tags,
+              fresh_tags: freshBook.volumeInfo.genre_tags
+            });
+            return mergedBook;
           });
+
+          console.log(`Final books for genre ${genre}:`, mergedBooks.map((book: Book) => ({
+            id: book.id,
+            title: book.volumeInfo.title,
+            volumeInfo_keys: Object.keys(book.volumeInfo),
+            genre_tags: book.volumeInfo.genre_tags
+          })));
 
           setBooks(mergedBooks);
           // Update cache with merged books
