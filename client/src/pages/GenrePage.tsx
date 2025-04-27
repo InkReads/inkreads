@@ -24,7 +24,10 @@ interface Book {
 
 interface CachedGenreData {
   books: Book[];
-  lastUpdated: Date;
+  lastUpdated: {
+    seconds: number;
+    nanoseconds: number;
+  } | Date;
   genre: string;
 }
 
@@ -46,8 +49,9 @@ export default function GenrePage() {
       
       if (!cachedData.empty) {
         const data = cachedData.docs[0].data() as CachedGenreData;
-        // Check if cache is less than 24 hours old
-        const cacheAge = new Date().getTime() - data.lastUpdated.getTime();
+        // Convert Firestore Timestamp to Date and check if cache is less than 24 hours old
+        const lastUpdated = data.lastUpdated instanceof Date ? data.lastUpdated : new Date(data.lastUpdated.seconds * 1000);
+        const cacheAge = new Date().getTime() - lastUpdated.getTime();
         if (cacheAge < 24 * 60 * 60 * 1000) {
           return data.books;
         }
