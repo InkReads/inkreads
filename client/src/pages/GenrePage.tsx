@@ -33,7 +33,7 @@ export default function GenrePage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const genreInfo = genre ? GENRES[genre as GenreSlug] : null;
 
@@ -42,7 +42,6 @@ export default function GenrePage() {
     if (!genre) return [];
     
     try {
-      const genreRef = doc(db, 'genre_cache', genre);
       const cachedData = await getDocs(query(collection(db, 'genre_cache'), where('genre', '==', genre)));
       
       if (!cachedData.empty) {
