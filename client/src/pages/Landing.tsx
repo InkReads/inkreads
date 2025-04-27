@@ -26,7 +26,7 @@ export default function Landing() {
             <Button
               variant={"default"}
               size={"lg"}
-              className="text-xl h-12 text-black bg-white hover:bg-[#dcdcdc]"
+              className="text-xl h-12 text-white bg-blue-600 hover:bg-blue-500"
             >
               <Link to="/signup">Get started</Link>
             </Button>

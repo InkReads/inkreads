@@ -7,6 +7,7 @@ import { Loader2, RefreshCcw, Sparkles, Library } from 'lucide-react';
 import { searchBooks } from '@/lib/api';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, setDoc, Timestamp } from 'firebase/firestore';
+import FanfictionSection from '@/components/fanfiction/FanfictionSection';
 
 interface Book {
   id: string;
@@ -124,7 +125,7 @@ export default function GenrePage() {
   // Main fetch function that orchestrates cached and fresh loads
   useEffect(() => {
     async function fetchBooks() {
-      if (!genreInfo) return;
+      if (!genreInfo || genre === 'fanfiction') return;
       
       try {
         setLoading(true);
@@ -188,7 +189,7 @@ export default function GenrePage() {
     }
 
     fetchBooks();
-  }, [genreInfo]);
+  }, [genreInfo, genre]);
 
   if (!genreInfo) {
     return (
@@ -197,6 +198,58 @@ export default function GenrePage() {
           <div className="text-center max-w-md mx-auto px-4">
             <h1 className="text-3xl font-bold text-indigo-900 mb-4">Genre not found</h1>
             <p className="text-indigo-600/70">The genre you're looking for doesn't exist or has been moved.</p>
+          </div>
+        </div>
+      </HomeLayout>
+    );
+  }
+
+  // Special case for fanfiction genre
+  if (genre === 'fanfiction') {
+    return (
+      <HomeLayout>
+        <div className="min-h-screen bg-white relative overflow-hidden">
+          {/* Dynamic Background Pattern */}
+          <div className="absolute inset-0" 
+            style={{
+              backgroundImage: `
+                radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px)
+              `,
+              backgroundSize: '100% 100%, 100% 100%, 2rem 2rem, 2rem 2rem'
+            }}
+          />
+
+          <div className="relative">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* Genre Header */}
+              <div className="relative py-8 sm:py-12">
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" />
+                </div>
+                
+                <div className="relative">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center p-2 bg-white/30 backdrop-blur-sm rounded-2xl mb-4 shadow-xl ring-1 ring-indigo-100">
+                      <genreInfo.icon className="w-8 h-8 text-indigo-600" />
+                    </div>
+                    
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 mb-3 animate-gradient-x">
+                      {genreInfo.title}
+                    </h1>
+                    
+                    <p className="text-lg text-indigo-600/70 max-w-2xl mx-auto leading-relaxed">
+                      {genreInfo.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fanfiction Section */}
+              <FanfictionSection />
+            </div>
           </div>
         </div>
       </HomeLayout>
