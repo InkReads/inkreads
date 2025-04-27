@@ -54,12 +54,20 @@ jobs:
         cd server
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
         echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> .env
-        echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
-        echo "FIREBASE_PRIVATE_KEY_ID=${{ secrets.FIREBASE_PRIVATE_KEY_ID }}" >> .env
-        echo "FIREBASE_PRIVATE_KEY='${{ secrets.FIREBASE_PRIVATE_KEY }}'" >> .env
-        echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> .env
-        echo "FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }}" >> .env
-        echo "FIREBASE_CLIENT_X509_CERT_URL=${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}" >> .env
+        
+        # Create service account JSON file
+        echo '{
+          "type": "service_account",
+          "project_id": "'${{ secrets.FIREBASE_PROJECT_ID }}'",
+          "private_key_id": "'${{ secrets.FIREBASE_PRIVATE_KEY_ID }}'",
+          "private_key": "'${{ secrets.FIREBASE_PRIVATE_KEY }}'",
+          "client_email": "'${{ secrets.FIREBASE_CLIENT_EMAIL }}'",
+          "client_id": "'${{ secrets.FIREBASE_CLIENT_ID }}'",
+          "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+          "token_uri": "https://oauth2.googleapis.com/token",
+          "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+          "client_x509_cert_url": "'${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}'"
+        }' > service-account.json
         
         # Client environment variables
         cd ../client
