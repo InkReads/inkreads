@@ -19,7 +19,7 @@ import {
 import { db } from '@/lib/firebase';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import { useAuthStore } from '@/store/authStore';
-import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award } from 'lucide-react';
+import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award, Tag } from 'lucide-react';
 import { BookOpen as LucideBookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getBookById } from '@/lib/api';
@@ -32,6 +32,7 @@ interface BookVolumeInfo {
     thumbnail: string;
   };
   publishedDate: string;
+  genre_tags?: string[];
 }
 
 interface Book {
@@ -485,6 +486,24 @@ export default function BookDetails() {
                   <p className="text-gray-600 leading-relaxed">
                     {book.volumeInfo.description}
                   </p>
+                  
+                  {/* Genre Tags */}
+                  {book.volumeInfo.genre_tags && book.volumeInfo.genre_tags.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Genres</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {book.volumeInfo.genre_tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors duration-300"
+                          >
+                            <Tag className="w-4 h-4" />
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Action Buttons */}

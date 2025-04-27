@@ -18,6 +18,7 @@ interface Book {
       thumbnail: string;
     };
     publishedDate?: string;
+    genre_tags?: string[];
   };
 }
 
@@ -131,6 +132,7 @@ export default function Home() {
                         thumbnail={book.volumeInfo.imageLinks?.thumbnail || '/placeholder-book.png'}
                         description={book.volumeInfo.description}
                         publishedDate={book.volumeInfo.publishedDate}
+                        genre_tags={book.volumeInfo.genre_tags}
                       />
                     </div>
                   ))}
