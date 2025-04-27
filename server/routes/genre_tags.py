@@ -1,6 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
-from openai import OpenAI
+import openai
 import os
 from dotenv import load_dotenv
 import logging
@@ -15,8 +15,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Set OpenAI API key
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 # Initialize Firebase Admin SDK
 if not firebase_admin._apps:
@@ -70,8 +70,8 @@ def generate_genre_tags(book_data):
     
     try:
         logger.info("📝 Sending request to OpenAI API")
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
+        response = openai.chat.completions.create(
+            model="gpt-4-turbo-preview",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that generates specific genre tags for books, with expertise in fan studies and fan culture."},
                 {"role": "user", "content": prompt}
