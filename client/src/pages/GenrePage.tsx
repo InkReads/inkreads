@@ -5,6 +5,8 @@ import HomeLayout from '@/components/layouts/HomeLayout';
 import BookCard from '@/components/books/BookCard';
 import { Loader2, RefreshCcw, Sparkles, Library } from 'lucide-react';
 import { searchBooks } from '@/lib/api';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, doc, setDoc, Timestamp } from 'firebase/firestore';
 
 interface Book {
   id: string;
@@ -16,17 +18,110 @@ interface Book {
       thumbnail: string;
     };
     publishedDate?: string;
+    genre_tags?: string[];
   };
+}
+
+interface CachedGenreData {
+  books: Book[];
+  lastUpdated: {
+    seconds: number;
+    nanoseconds: number;
+  } | Date;
+  genre: string;
 }
 
 export default function GenrePage() {
   const { genre } = useParams<{ genre: GenreSlug }>();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [, setError] = useState<string | null>(null);
 
   const genreInfo = genre ? GENRES[genre as GenreSlug] : null;
 
+  // Function to fetch cached books from Firestore
+  const fetchCachedBooks = async () => {
+    if (!genre) return [];
+    
+    try {
+      const cachedData = await getDocs(query(collection(db, 'genre_cache'), where('genre', '==', genre)));
+      
+      if (!cachedData.empty) {
+        const data = cachedData.docs[0].data() as CachedGenreData;
+        // Convert Firestore Timestamp to Date and check if cache is less than 24 hours old
+        const lastUpdated = data.lastUpdated instanceof Date ? data.lastUpdated : new Date(data.lastUpdated.seconds * 1000);
+        const cacheAge = new Date().getTime() - lastUpdated.getTime();
+        if (cacheAge < 24 * 60 * 60 * 1000) {
+          return data.books;
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching cached books:', error);
+      return [];
+    }
+  };
+
+  // Function to update cache with new books
+  const updateCache = async (newBooks: Book[]) => {
+    if (!genre) return;
+    
+    try {
+      const genreRef = doc(db, 'genre_cache', genre);
+      await setDoc(genreRef, {
+        books: newBooks,
+        lastUpdated: Timestamp.now(),
+        genre
+      });
+    } catch (error) {
+      console.error('Error updating cache:', error);
+    }
+  };
+
+  // Function to fetch fresh books from API
+  const fetchFreshBooks = async () => {
+    if (!genreInfo) return [];
+    
+    try {
+      setRefreshing(true);
+      const freshBooks = await searchBooks(genreInfo.query);
+      console.log(`Fresh books from API for genre ${genre}:`, freshBooks.map((book: Book) => ({
+        id: book.id,
+        title: book.volumeInfo.title,
+        volumeInfo_keys: Object.keys(book.volumeInfo),
+        genre_tags: book.volumeInfo.genre_tags
+      })));
+      return freshBooks;
+    } catch (error) {
+      console.error('Error fetching fresh books:', error);
+      return [];
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Function to clear cache for testing
+  /*
+  const clearCache = async () => {
+    if (!genre) return;
+    try {
+      const cacheRef = collection(db, 'genre_cache');
+      const q = query(cacheRef, where('genre', '==', genre));
+      const querySnapshot = await getDocs(q);
+      
+      const deletePromises = querySnapshot.docs.map(doc => 
+        deleteDoc(doc.ref)
+      );
+      
+      await Promise.all(deletePromises);
+      console.log('Cache cleared for genre:', genre);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+    }
+  };
+*/
+  // Main fetch function that orchestrates cached and fresh loads
   useEffect(() => {
     async function fetchBooks() {
       if (!genreInfo) return;
@@ -34,9 +129,56 @@ export default function GenrePage() {
       try {
         setLoading(true);
         setError(null);
-        const query = genreInfo.query;
-        const books = await searchBooks(query);
-        setBooks(books);
+
+        // First, try to load cached books
+        const cachedBooks = await fetchCachedBooks();
+        console.log(`Cached books for genre ${genre}:`, cachedBooks.map((book: Book) => ({
+          id: book.id,
+          title: book.volumeInfo.title,
+          volumeInfo_keys: Object.keys(book.volumeInfo),
+          genre_tags: book.volumeInfo.genre_tags
+        })));
+        if (cachedBooks.length > 0) {
+          setBooks(cachedBooks);
+          setLoading(false);
+        }
+
+        // Then fetch fresh books in the background
+        const freshBooks = await fetchFreshBooks();
+        if (freshBooks.length > 0) {
+          // Merge fresh books with cached books, preferring fresh data but keeping cached genre tags
+          const mergedBooks = freshBooks.map((freshBook: Book) => {
+            const cachedBook = cachedBooks.find(cached => cached.id === freshBook.id);
+            const mergedBook = {
+              ...freshBook,
+              volumeInfo: {
+                ...freshBook.volumeInfo,
+                genre_tags: cachedBook?.volumeInfo.genre_tags || freshBook.volumeInfo.genre_tags
+              }
+            };
+            console.log('Merged book details:', {
+              id: mergedBook.id,
+              title: mergedBook.volumeInfo.title,
+              volumeInfo_keys: Object.keys(mergedBook.volumeInfo),
+              genre_tags: mergedBook.volumeInfo.genre_tags,
+              from_cache: !!cachedBook,
+              cached_tags: cachedBook?.volumeInfo.genre_tags,
+              fresh_tags: freshBook.volumeInfo.genre_tags
+            });
+            return mergedBook;
+          });
+
+          console.log(`Final books for genre ${genre}:`, mergedBooks.map((book: Book) => ({
+            id: book.id,
+            title: book.volumeInfo.title,
+            volumeInfo_keys: Object.keys(book.volumeInfo),
+            genre_tags: book.volumeInfo.genre_tags
+          })));
+
+          setBooks(mergedBooks);
+          // Update cache with merged books
+          await updateCache(mergedBooks);
+        }
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch books');
         console.error('Error fetching books:', error);
@@ -63,116 +205,82 @@ export default function GenrePage() {
 
   return (
     <HomeLayout>
-      <div className="min-h-screen bg-white relative overflow-hidden">
-        {/* Dynamic Background Pattern */}
-        <div className="absolute inset-0" 
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-              linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px)
-            `,
-            backgroundSize: '100% 100%, 100% 100%, 2rem 2rem, 2rem 2rem'
-          }}
-        />
+      <div className="min-h-screen bg-gradient-to-b from-white to-indigo-50/50">
+        {/* Hero Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-12">
+            <div className="inline-block p-3 rounded-2xl bg-white/50 backdrop-blur-sm mb-6">
+              <genreInfo.icon className="w-12 h-12 text-indigo-600" />
+            </div>
+            <h1 className="text-4xl font-bold text-indigo-900 mb-4">{genreInfo.title}</h1>
+            <p className="text-lg text-indigo-600/70 max-w-2xl mx-auto">
+              {genreInfo.description}
+            </p>
+          </div>
 
-        <div className="relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Genre Header */}
-            <div className="relative py-8 sm:py-12">
-              <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" />
-              </div>
-              
-              <div className="relative">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center p-2 bg-white/30 backdrop-blur-sm rounded-2xl mb-4 shadow-xl ring-1 ring-indigo-100">
-                    <genreInfo.icon className="w-8 h-8 text-indigo-600" />
-                  </div>
-                  
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 mb-3 animate-gradient-x">
-                    {genreInfo.title}
-                  </h1>
-                  
-                  <p className="text-lg text-indigo-600/70 max-w-2xl mx-auto leading-relaxed">
-                    {genreInfo.description}
-                  </p>
+          {/* Loading States */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center min-h-[300px]">
+              <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
+              <p className="mt-4 text-lg text-indigo-600/70">Loading books...</p>
+            </div>
+          ) : books.length === 0 ? (
+            <div className="text-center py-16 px-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-12 shadow-xl max-w-md mx-auto border border-indigo-50 ring-1 ring-indigo-100">
+                <div className="relative mb-6">
+                  <Library className="h-20 w-20 mx-auto text-indigo-300" />
+                  <Sparkles className="h-6 w-6 text-indigo-400 absolute top-0 right-1/3 animate-bounce" />
                 </div>
+                <h3 className="text-2xl font-bold text-indigo-900 mb-3">
+                  No books found
+                </h3>
+                <p className="text-indigo-600/70 text-lg">
+                  We couldn't find any books in this genre. Try checking back later.
+                </p>
               </div>
             </div>
-
-            {/* Content Section */}
-            <div className="relative pt-4 pb-20">
-              {loading ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px]">
-                  <div className="relative">
-                    <Loader2 className="h-16 w-16 animate-spin text-indigo-500" />
-                    <div className="absolute inset-0 animate-ping opacity-50">
-                      <Loader2 className="h-16 w-16 text-indigo-300" />
-                    </div>
-                  </div>
-                  <p className="mt-6 text-xl text-indigo-600/70">Discovering amazing books...</p>
-                </div>
-              ) : error ? (
-                <div className="text-center py-16 px-4">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl max-w-md mx-auto border border-red-100 ring-1 ring-red-50">
-                    <p className="text-red-500 text-lg mb-4">{error}</p>
-                    <button 
-                      onClick={() => window.location.reload()} 
-                      className="inline-flex items-center gap-2 px-6 py-3 text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all duration-200 hover:shadow-lg hover:scale-105"
-                    >
-                      <RefreshCcw className="h-5 w-5" />
-                      <span>Try again</span>
-                    </button>
-                  </div>
-                </div>
-              ) : books.length === 0 ? (
-                <div className="text-center py-16 px-4">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-12 shadow-xl max-w-md mx-auto border border-indigo-50 ring-1 ring-indigo-100">
-                    <div className="relative mb-6">
-                      <Library className="h-20 w-20 mx-auto text-indigo-300" />
-                      <Sparkles className="h-6 w-6 text-indigo-400 absolute top-0 right-1/3 animate-bounce" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-indigo-900 mb-3">
-                      No books found
-                    </h3>
-                    <p className="text-indigo-600/70 text-lg">
-                      We couldn't find any books in this genre. Try checking back later.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid gap-8 relative">
-                  {books.map((book, index) => (
-                    <div
-                      key={book.id}
-                      className="transform hover:-translate-y-1 transition-all duration-200"
-                      style={{
-                        opacity: 0,
-                        animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s forwards`
-                      }}
-                    >
-                      <BookCard
-                        id={book.id}
-                        title={book.volumeInfo.title}
-                        authors={book.volumeInfo.authors || []}
-                        thumbnail={book.volumeInfo.imageLinks?.thumbnail || '/placeholder-book.png'}
-                        description={book.volumeInfo.description}
-                        publishedDate={book.volumeInfo.publishedDate}
-                        reverse={index % 2 === 1}
-                      />
-                    </div>
-                  ))}
+          ) : (
+            <>
+              {/* Refresh Indicator */}
+              {refreshing && (
+                <div className="flex items-center justify-center gap-2 mb-6 text-indigo-600/70">
+                  <RefreshCcw className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Refreshing results...</span>
                 </div>
               )}
-            </div>
-          </div>
+              
+              {/* Books Grid */}
+              <div className="grid gap-8 relative">
+                {books.map((book, index) => (
+                  <div
+                    key={book.id}
+                    className="transform hover:-translate-y-1 transition-all duration-200"
+                    style={{
+                      opacity: 0,
+                      animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s forwards`
+                    }}
+                  >
+                    <BookCard
+                      id={book.id}
+                      title={book.volumeInfo.title}
+                      authors={book.volumeInfo.authors || []}
+                      thumbnail={book.volumeInfo.imageLinks?.thumbnail || '/placeholder-book.png'}
+                      description={book.volumeInfo.description}
+                      publishedDate={book.volumeInfo.publishedDate}
+                      reverse={index % 2 === 1}
+                      genre_tags={book.volumeInfo.genre_tags}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Decorative Elements */}
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-br from-indigo-500/30 to-purple-500/30 blur-3xl opacity-20 animate-pulse" />
         <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-tr from-purple-500/30 to-pink-500/30 blur-3xl opacity-20 animate-pulse delay-1000" />
+
       </div>
     </HomeLayout>
   );

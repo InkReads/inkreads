@@ -1,4 +1,4 @@
-import { ThumbsUp, Calendar, ChevronRight, Star } from "lucide-react";
+import { ThumbsUp, Calendar, ChevronRight, Star, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -11,6 +11,7 @@ interface BookCardProps {
   description?: string;
   publishedDate?: string;
   reverse?: boolean;
+  genre_tags?: string[];
 }
 
 export default function BookCard({
@@ -22,9 +23,18 @@ export default function BookCard({
   description,
   publishedDate,
   reverse = false,
+  genre_tags = [],
 }: BookCardProps) {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  console.log('BookCard props for:', title, {
+    id,
+    genre_tags,
+    genre_tags_type: typeof genre_tags,
+    is_array: Array.isArray(genre_tags),
+    length: genre_tags?.length
+  });
 
   const getHighQualityThumbnail = (url: string) => {
     if (!url) return "/placeholder-book.png";
@@ -49,6 +59,7 @@ export default function BookCard({
         upvotes,
         description,
         publishedDate,
+        genre_tags
       },
     };
     const encodedData = encodeURIComponent(JSON.stringify(bookData));
@@ -148,6 +159,26 @@ export default function BookCard({
             <p className="mt-4 text-gray-600 text-base leading-relaxed line-clamp-3 font-light group-hover:text-gray-800 transition-colors duration-300">
               {description}
             </p>
+          )}
+
+          {/* Genre Tags */}
+          {Array.isArray(genre_tags) && genre_tags.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {genre_tags.slice(0, 3).map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors duration-300"
+                >
+                  <Tag className="w-3 h-3" />
+                  {tag}
+                </span>
+              ))}
+              {genre_tags.length > 3 && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors duration-300">
+                  +{genre_tags.length - 3} more
+                </span>
+              )}
+            </div>
           )}
         </div>
 
