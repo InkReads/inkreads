@@ -2,9 +2,9 @@ name: Node.js CI & Deployment
 
 on:
   push:
-    branches: [ main, feat/migrate-react-flask ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag ]
   pull_request:
-    branches: [ main, feat/migrate-react-flask ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag ]
 
 jobs:
   build:
@@ -54,6 +54,12 @@ jobs:
         cd server
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
         echo "GOOGLE_BOOKS_API_KEY=${{ secrets.GOOGLE_BOOKS_API_KEY }}" >> .env
+        echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
+        echo "FIREBASE_PRIVATE_KEY_ID=${{ secrets.FIREBASE_PRIVATE_KEY_ID }}" >> .env
+        echo "FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}" >> .env
+        echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> .env
+        echo "FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }}" >> .env
+        echo "FIREBASE_CLIENT_X509_CERT_URL=${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}" >> .env
         
         # Client environment variables
         cd ../client
