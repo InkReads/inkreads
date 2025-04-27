@@ -18,7 +18,7 @@ import SearchInput from '@/components/SearchInput';
 
 const NAVIGATION_SECTIONS = [
   { "Community": ["Stories", "Authors", "Users"] },
-  { "Browse": ["Novels", "Light Novels", "Comics", "Fanfiction"] },
+  { "Browse": ["Novels", "Light Novels", "Comics", "Manga", "Fanfiction"] },
 ] as const;
 
 type MenuItem = 

@@ -6,6 +6,7 @@ export interface BookVolumeInfo {
     thumbnail: string;
   };
   averageRating?: number;
+  genre_tags?: string[];
 }
 
 export interface Book {

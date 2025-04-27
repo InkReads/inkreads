@@ -1,4 +1,4 @@
-import { BookOpenText, BookText, Palette, Sparkles } from 'lucide-react';
+import { BookOpenText, BookText, Palette, Sparkles, Search } from 'lucide-react';
 
 export const GENRES = {
   lightnovels: {
@@ -19,11 +19,23 @@ export const GENRES = {
     description: "Browse comics, graphic novels, and manga",
     icon: Palette
   },
+  mystery: {
+    title: "Mystery & Thriller",
+    query: "mystery thriller suspense",
+    description: "Dive into gripping mysteries and heart-pounding thrillers",
+    icon: Search
+  },
   fanfiction: {
     title: "Fanfiction",
     query: "fanfiction",
     description: "Read fan-created stories from your favorite universes",
     icon: Sparkles
+  },
+  manga: {
+    title: "Manga",
+    query: "manga",
+    description: "Explore Japanese manga and their translations",
+    icon: Palette
   }
 } as const;
 

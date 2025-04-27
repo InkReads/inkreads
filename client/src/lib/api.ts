@@ -7,6 +7,7 @@ export async function searchBooks(query: string, maxResults: number = 12) {
     );
     if (!response.ok) throw new Error('Failed to fetch books');
     const data = await response.json();
+    console.log('Raw API response:', data);
     return data.items || [];
   } catch (error) {
     console.error('Error searching books:', error);
