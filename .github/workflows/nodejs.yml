@@ -2,9 +2,9 @@ name: Node.js CI & Deployment
 
 on:
   push:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions ]
   pull_request:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions ]
 
 jobs:
   build:
