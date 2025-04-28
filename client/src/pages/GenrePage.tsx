@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { GENRES, type GenreSlug } from '@/components/constants';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import BookCard from '@/components/books/BookCard';
-import { Loader2, RefreshCcw, Sparkles, Library } from 'lucide-react';
+import { Loader2, RefreshCcw, Sparkles, Library, Users } from 'lucide-react';
 import { searchBooks } from '@/lib/api';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, setDoc, Timestamp } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 interface Book {
   id: string;
@@ -37,6 +38,7 @@ export default function GenrePage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const genreInfo = genre ? GENRES[genre as GenreSlug] : null;
 
@@ -217,6 +219,25 @@ export default function GenrePage() {
               {genreInfo.description}
             </p>
           </div>
+
+          {/* User-Created Fanfictions Section - Only show for fanfiction genre */}
+          {genre === 'fanfiction' && (
+            <div className="mb-12">
+              <div
+                onClick={() => navigate('/fanfiction/user')}
+                className="group relative overflow-hidden rounded-xl cursor-pointer bg-white/50 backdrop-blur-sm border border-indigo-100/20"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/90 to-purple-600/90 opacity-90 group-hover:opacity-100 transition-all duration-300" />
+                <div className="relative p-6 flex flex-col items-center justify-center min-h-[140px] text-center">
+                  <Users className="w-10 h-10 text-white mb-2 group-hover:scale-110 transition-transform duration-300" />
+                  <h3 className="text-xl font-semibold text-white mb-2">Community Creations</h3>
+                  <p className="text-base text-white/80 max-w-2xl">
+                    Discover unique stories created by fellow InkReads users. From alternate endings to original characters, explore the creativity of our community.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Loading States */}
           {loading ? (
