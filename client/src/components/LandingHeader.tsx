@@ -146,7 +146,7 @@ function UserMenu() {
 function AuthActions() {
   return (
     <div className="flex gap-2">
-      <Button variant="link" asChild className="hidden sm:block">
+      <Button variant="default" asChild className="hidden sm:block bg-blue-600 hover:bg-blue-500 text-white">
         <Link to="/login">Login</Link>
       </Button>
       <Button variant="default" asChild className="hidden sm:block bg-blue-600 hover:bg-blue-500 text-white">
