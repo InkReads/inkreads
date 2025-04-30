@@ -87,11 +87,27 @@ export default function BookDetails() {
         const bookData = searchParams.get('data');
         if (bookData) {
           const parsedBook = JSON.parse(decodeURIComponent(bookData));
-          // Initialize votes if not present
+          
+          // Check Firestore for existing document
+          const bookRef = doc(db, 'books', id);
+          const bookDoc = await getDoc(bookRef);
+          
+          if (!bookDoc.exists()) {
+            // Create book document if it doesn't exist
+            await setDoc(bookRef, {
+              upvotes: [],
+              downvotes: [],
+              volumeInfo: parsedBook.volumeInfo
+            });
+          }
+
+          const firestoreData = bookDoc.exists() ? bookDoc.data() : { upvotes: [], downvotes: [] };
+
+          // Merge API data with Firestore data
           setBook({
             ...parsedBook,
-            upvotes: [],
-            downvotes: []
+            upvotes: firestoreData.upvotes || [],
+            downvotes: firestoreData.downvotes || []
           });
           return;
         }
@@ -102,16 +118,27 @@ export default function BookDetails() {
         // Check Firestore for votes
         const bookRef = doc(db, 'books', id);
         const bookDoc = await getDoc(bookRef);
-        const firestoreData = bookDoc.exists() ? bookDoc.data() : null;
+        
+        if (!bookDoc.exists()) {
+          // Create book document if it doesn't exist
+          await setDoc(bookRef, {
+            upvotes: [],
+            downvotes: [],
+            volumeInfo: apiData.volumeInfo
+          });
+        }
 
+        const firestoreData = bookDoc.exists() ? bookDoc.data() : { upvotes: [], downvotes: [] };
+
+        // Merge API data with Firestore data
         setBook({
           ...apiData,
-          upvotes: firestoreData?.upvotes || [],
-          downvotes: firestoreData?.downvotes || []
+          upvotes: firestoreData.upvotes || [],
+          downvotes: firestoreData.downvotes || []
         });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load book');
-        console.error('Error fetching book:', err);
+      } catch (error) {
+        console.error('Error fetching book:', error);
+        setError('Failed to load book');
       } finally {
         setLoading(false);
       }
@@ -158,21 +185,17 @@ export default function BookDetails() {
 
     try {
       const bookRef = doc(db, 'books', book.id);
-      const bookDoc = await getDoc(bookRef);
-      
-      if (!bookDoc.exists()) {
-        // Create book document if it doesn't exist
-        await setDoc(bookRef, {
-          upvotes: [],
-          downvotes: [],
-          volumeInfo: book.volumeInfo
-        });
-      }
-
-      const upvotes = book.upvotes || [];
-      const downvotes = book.downvotes || [];
       const userId = user.uid;
 
+      // Get the current document
+      const bookDoc = await getDoc(bookRef);
+      
+      // Initialize arrays if they don't exist
+      const currentData = bookDoc.exists() ? bookDoc.data() : {};
+      const upvotes = Array.isArray(currentData.upvotes) ? currentData.upvotes : [];
+      const downvotes = Array.isArray(currentData.downvotes) ? currentData.downvotes : [];
+
+      // Calculate new vote state
       let newUpvotes = [...upvotes];
       let newDownvotes = [...downvotes];
 
@@ -192,11 +215,15 @@ export default function BookDetails() {
         }
       }
 
-      await updateDoc(bookRef, {
+      // Update Firestore with all necessary fields
+      await setDoc(bookRef, {
         upvotes: newUpvotes,
-        downvotes: newDownvotes
-      });
+        downvotes: newDownvotes,
+        volumeInfo: book.volumeInfo,
+        lastUpdated: new Date().toISOString()
+      }, { merge: true });
 
+      // Update local state only after successful Firestore update
       setBook(prev => prev ? {
         ...prev,
         upvotes: newUpvotes,
@@ -204,6 +231,7 @@ export default function BookDetails() {
       } : null);
     } catch (error) {
       console.error('Error voting:', error);
+      // Optionally show error to user
     }
   };
 
@@ -274,7 +302,10 @@ export default function BookDetails() {
         downvotes: []
       };
 
+      // Save review to Firestore
       await setDoc(reviewRef, newReview);
+
+      // Update local state
       setReviews(prev => [newReview, ...prev]);
       setReviewContent('');
       setIsWritingReview(false);
