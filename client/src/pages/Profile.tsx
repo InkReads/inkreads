@@ -5,9 +5,11 @@ import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRem
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil } from "lucide-react";
+import { Pencil, BookOpen } from "lucide-react";
 import HomeLayout from '@/components/layouts/HomeLayout';
 import HomeNavbar from '@/components/HomeNavbar';
+import UserListBox from '@/components/UserListBox';
+import ProfileReadingLists from '@/components/ProfileReadingLists';
 
 interface UserProfile {
   uid: string;
@@ -18,9 +20,16 @@ interface UserProfile {
   bio?: string;
   joinDate?: string;
   reviewCount?: number;
-  readingListsCount?: number;
   upvotes?: number;
   downvotes?: number;
+}
+
+interface ReadingList {
+  id: string;
+  name: string;
+  description?: string;
+  books: string[];
+  userId: string;
 }
 
 const formatJoinDate = (dateString?: string) => {
@@ -40,7 +49,21 @@ export default function Profile() {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [editedBio, setEditedBio] = useState("");
   const [charCount, setCharCount] = useState(0);
+  const [showUserList, setShowUserList] = useState<{ type: 'followers' | 'following' | null, userIds: string[] }>({ type: null, userIds: [] });
   const MAX_CHARS = 100;
+  const [readingLists, setReadingLists] = useState<ReadingList[]>([]);
+  const [loadingLists, setLoadingLists] = useState(true);
+  const [selectedList, setSelectedList] = useState<ReadingList | null>(null);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+
+  useEffect(() => {
+    const checkOwnProfile = () => {
+      if (auth.currentUser && profile) {
+        setIsOwnProfile(auth.currentUser.uid === profile.uid);
+      }
+    };
+    checkOwnProfile();
+  }, [profile]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -98,6 +121,32 @@ export default function Profile() {
 
     fetchProfile();
   }, [username]);
+
+  useEffect(() => {
+    const fetchReadingLists = async () => {
+      try {
+        const readingListsRef = collection(db, "readingLists");
+        const q = query(readingListsRef, where("userId", "==", profile?.uid));
+        const querySnapshot = await getDocs(q);
+        
+        const fetchedLists = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name as string,
+          description: doc.data().description as string | undefined,
+          books: doc.data().books as string[] || [],
+          userId: doc.data().userId as string
+        }));
+        
+        setReadingLists(fetchedLists);
+      } catch (error) {
+        console.error("Error fetching reading lists:", error);
+      } finally {
+        setLoadingLists(false);
+      }
+    };
+
+    fetchReadingLists();
+  }, [profile?.uid]);
 
   const handleToggleFollow = async () => {
     const currentUser = auth.currentUser;
@@ -171,6 +220,44 @@ export default function Profile() {
     setIsEditingBio(false);
   };
 
+  const handleShowFollowers = () => {
+    if (profile) {
+      setShowUserList({ type: 'followers', userIds: profile.followers });
+    }
+  };
+
+  const handleShowFollowing = () => {
+    if (profile) {
+      setShowUserList({ type: 'following', userIds: profile.following });
+    }
+  };
+
+  const handleCloseUserList = () => {
+    setShowUserList({ type: null, userIds: [] });
+  };
+
+  const handleDeleteList = async () => {
+    try {
+      const readingListsRef = collection(db, "readingLists");
+      const q = query(readingListsRef, where("userId", "==", profile?.uid));
+      const querySnapshot = await getDocs(q);
+      
+      const fetchedLists = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name as string,
+        description: doc.data().description as string | undefined,
+        books: doc.data().books as string[] || [],
+        userId: doc.data().userId as string
+      }));
+      
+      setReadingLists(fetchedLists);
+    } catch (error) {
+      console.error("Error fetching reading lists:", error);
+    } finally {
+      setLoadingLists(false);
+    }
+  };
+
   return (
     <HomeLayout>
       <HomeNavbar />
@@ -211,11 +298,11 @@ export default function Profile() {
                   {/* Right side - Followers, following, and bio */}
                   <div className="flex flex-col gap-4 flex-1 min-w-0">
                     <div className="flex gap-8">
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center cursor-pointer" onClick={handleShowFollowers}>
                         <span className="text-xl font-bold">{profile.followers.length}</span>
                         <span className="text-sm text-gray-600">followers</span>
                       </div>
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center cursor-pointer" onClick={handleShowFollowing}>
                         <span className="text-xl font-bold">{profile.following.length}</span>
                         <span className="text-sm text-gray-600">following</span>
                       </div>
@@ -288,24 +375,16 @@ export default function Profile() {
                       </span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-sm text-gray-500">Reviews</span>
-                      <span className="font-medium">{profile.reviewCount || 0}</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm text-gray-500">Books Upvoted</span>
+                      <span className="text-sm text-gray-500">Likes</span>
                       <span className="font-medium">{profile.upvotes || 0}</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-sm text-gray-500">Books Downvoted</span>
+                      <span className="text-sm text-gray-500">Dislikes</span>
                       <span className="font-medium">{profile.downvotes || 0}</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-sm text-gray-500">Reviews Written</span>
+                      <span className="text-sm text-gray-500">Written Reviews</span>
                       <span className="font-medium">{profile.reviewCount || 0}</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm text-gray-500">Reading Lists</span>
-                      <span className="font-medium">{profile.readingListsCount || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -313,11 +392,59 @@ export default function Profile() {
                 {/* Reading Lists Box */}
                 <div className="flex flex-col gap-4 bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 flex-1">
                   <h2 className="text-xl font-semibold">Reading Lists</h2>
-                  {/* Reading lists content will go here */}
-                  <p className="text-gray-500">Reading lists coming soon...</p>
+                  <div className="mt-8">
+                    {loadingLists ? (
+                      <div className="flex justify-center items-center h-32">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+                      </div>
+                    ) : readingLists.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No reading lists yet</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {readingLists.map(list => (
+                          <button
+                            key={list.id}
+                            onClick={() => setSelectedList(list)}
+                            className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 hover:ring-2 hover:ring-indigo-200 transition-all duration-300 text-left"
+                          >
+                            <div className="flex flex-col h-full">
+                              <div className="flex items-start justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">{list.name}</h3>
+                                <div className="flex items-center gap-2 text-indigo-600">
+                                  <BookOpen className="w-5 h-5" />
+                                  <span className="text-sm font-medium">{list.books.length}</span>
+                                </div>
+                              </div>
+                              {list.description && (
+                                <p className="text-gray-600 text-sm line-clamp-2">
+                                  {list.description}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+            {showUserList.type && (
+              <UserListBox
+                userIds={showUserList.userIds}
+                title={showUserList.type === 'followers' ? 'Followers' : 'Following'}
+                onClose={handleCloseUserList}
+              />
+            )}
+            {selectedList && (
+              <ProfileReadingLists
+                list={selectedList}
+                onClose={() => setSelectedList(null)}
+                onDelete={isOwnProfile ? handleDeleteList : undefined}
+              />
+            )}
           </div>
         )}
       </main>

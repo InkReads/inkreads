@@ -19,10 +19,11 @@ import {
 import { db } from '@/lib/firebase';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import { useAuthStore } from '@/store/authStore';
-import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award, Tag } from 'lucide-react';
+import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award, Tag, Plus } from 'lucide-react';
 import { BookOpen as LucideBookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getBookById } from '@/lib/api';
+import AddBookToList from '@/components/AddBookToList';
 
 interface BookVolumeInfo {
   title: string;
@@ -75,6 +76,7 @@ export default function BookDetails() {
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [hasMoreReviews, setHasMoreReviews] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [showAddToList, setShowAddToList] = useState(false);
 
   // Fetch book details
   useEffect(() => {
@@ -538,14 +540,14 @@ export default function BookDetails() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 mt-6">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleBookVote('upvote')}
                     className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                      book.upvotes?.includes(user?.uid || '') 
-                        ? "bg-indigo-600 text-white"
+                      book.upvotes?.includes(user?.uid || '')
+                        ? "bg-green-600 text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
@@ -565,6 +567,17 @@ export default function BookDetails() {
                     <ThumbsDown className={`w-5 h-5 ${book.downvotes?.includes(user?.uid || '') ? "fill-white" : ""}`} />
                     <span>{book.downvotes?.length || 0}</span>
                   </motion.button>
+                  {user && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowAddToList(true)}
+                      className="flex items-center gap-2 px-6 py-3 rounded-full font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                    >
+                      <Plus className="w-5 h-5" />
+                      <span>Add to List</span>
+                    </motion.button>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -694,6 +707,12 @@ export default function BookDetails() {
           )}
         </div>
       </div>
+      {showAddToList && book && (
+        <AddBookToList
+          bookId={book.id}
+          onClose={() => setShowAddToList(false)}
+        />
+      )}
     </HomeLayout>
   );
 } 
