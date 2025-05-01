@@ -34,7 +34,6 @@ export default function HomeNavbar() {
   const { user } = useAuthStore(); 
 
   return (
-
     <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-white shadow-sm">
       <header className="w-full flex gap-4 items-center">
 
