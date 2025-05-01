@@ -4,8 +4,7 @@ import { db, auth } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Pencil, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import HomeLayout from '@/components/layouts/HomeLayout';
 import HomeNavbar from '@/components/HomeNavbar';
 import UserListBox from '@/components/UserListBox';
@@ -47,11 +46,7 @@ export default function Profile() {
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditingBio, setIsEditingBio] = useState(false);
-  const [editedBio, setEditedBio] = useState("");
-  const [charCount, setCharCount] = useState(0);
   const [showUserList, setShowUserList] = useState<{ type: 'followers' | 'following' | null, userIds: string[] }>({ type: null, userIds: [] });
-  const MAX_CHARS = 100;
   const [readingLists, setReadingLists] = useState<ReadingList[]>([]);
   const [loadingLists, setLoadingLists] = useState(true);
   const [selectedList, setSelectedList] = useState<ReadingList | null>(null);
@@ -188,39 +183,6 @@ export default function Profile() {
     }
   };
 
-  const handleEditBio = async () => {
-    if (!auth.currentUser || !profile || auth.currentUser.uid !== profile.uid) return;
-    if (charCount > MAX_CHARS) return;
-
-    try {
-      const userRef = doc(db, "users", profile.uid);
-      await updateDoc(userRef, {
-        bio: editedBio
-      });
-      setProfile(prev => prev ? { ...prev, bio: editedBio } : null);
-      setIsEditingBio(false);
-    } catch (error) {
-      console.error("Error updating bio:", error);
-    }
-  };
-
-  const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    setCharCount(text.length);
-    setEditedBio(text);
-  };
-
-  const handleStartEditing = () => {
-    const initialBio = profile?.bio || "";
-    setEditedBio(initialBio);
-    setCharCount(initialBio.length);
-    setIsEditingBio(true);
-  };
-
-  const handleCancelEditing = () => {
-    setIsEditingBio(false);
-  };
-
   const handleShowFollowers = () => {
     if (profile) {
       setShowUserList({ type: 'followers', userIds: profile.followers });
@@ -308,57 +270,10 @@ export default function Profile() {
                         <span className="text-base text-muted-foreground">following</span>
                       </div>
                     </div>
-                    <div className="mt-4 w-full">
-                      {isEditingBio ? (
-                        <div className="space-y-2">
-                          <Textarea
-                            value={editedBio}
-                            onChange={handleBioChange}
-                            placeholder="Write something about yourself..."
-                            className="min-h-[100px] max-h-[200px] resize-none w-full"
-                          />
-                          <div className="flex justify-between items-center">
-                            <div className="text-sm text-muted-foreground">
-                              {charCount}/{MAX_CHARS} characters
-                              {charCount > MAX_CHARS && (
-                                <span className="text-red-500 ml-2">(Too many characters)</span>
-                              )}
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleCancelEditing}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={handleEditBio}
-                                disabled={charCount > MAX_CHARS}
-                              >
-                                Save
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-2 w-full">
-                          <p className="text-muted-foreground break-words overflow-hidden overflow-wrap-anywhere w-full">
-                            {profile.bio || "No bio available"}
-                          </p>
-                          {auth.currentUser && auth.currentUser.uid === profile.uid && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleStartEditing}
-                              className="h-8 px-2 flex-shrink-0"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
+                    <div className="flex items-start gap-2 w-full">
+                      <p className="text-muted-foreground break-words overflow-hidden overflow-wrap-anywhere w-full">
+                        {profile.bio || "No bio available"}
+                      </p>
                     </div>
                   </div>
                 </div>

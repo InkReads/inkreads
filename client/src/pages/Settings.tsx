@@ -14,7 +14,7 @@ import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 
 type SettingsTab = 'account' | 'privacy' | 'display';
 
 export default function Settings() {
-  const { userData } = useAuthStore();
+  const { userData, fetchUserData } = useAuthStore();
   const { isDarkMode, setDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -34,12 +34,13 @@ export default function Settings() {
 
   useEffect(() => {
     if (userData) {
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         username: userData.username,
         email: userData.email,
         bio: userData.bio || "",
         isPrivate: userData.isPrivate || false,
-      });
+      }));
     }
   }, [userData]);
 
@@ -118,6 +119,10 @@ export default function Settings() {
         darkMode: isDarkMode,
         updatedAt: new Date().toISOString()
       });
+      
+      // Fetch updated user data
+      await fetchUserData();
+      
       // Redirect to profile page after successful update
       navigate(`/profile/${formData.username}`);
     } catch (error) {
