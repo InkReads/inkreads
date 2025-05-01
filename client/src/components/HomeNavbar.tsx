@@ -15,6 +15,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 // import { SidebarTrigger } from '@/components/ui/sidebar';
 import SearchInput from '@/components/SearchInput';
+import logo from '@/assets/icons/black-logo.png';
 
 const NAVIGATION_SECTIONS = [
   { "Community": ["Stories", "Authors", "Users"] },
@@ -33,11 +34,16 @@ export default function HomeNavbar() {
   const { user } = useAuthStore();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-background border-b border-border">
-      <header className="w-full flex gap-8 items-center">
+
+    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-white shadow-sm">
+      <header className="w-full flex gap-4 items-center">
+
         {/* Logo Section */}
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-2 items-center">
           {/** user && <SidebarTrigger className="hover:cursor-pointer" /> **/}
+          <div className="hidden lg:block">
+            <img src={logo} alt="logo-image" width={70} className="mt-2" />
+          </div>
           <Link to="/">
             <span className="text-2xl text-foreground">InkReads</span>
           </Link>
