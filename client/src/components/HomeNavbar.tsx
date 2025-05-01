@@ -31,7 +31,7 @@ interface NavDropdownProps {
 }
 
 export default function HomeNavbar() {
-  const { user } = useAuthStore();
+  const { user } = useAuthStore(); 
 
   return (
 
