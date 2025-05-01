@@ -195,10 +195,10 @@ export default function GenrePage() {
   if (!genreInfo) {
     return (
       <HomeLayout>
-        <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-b from-white to-indigo-50/50">
+        <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-b from-white dark:from-background to-indigo-50/50 dark:to-accent/10">
           <div className="text-center max-w-md mx-auto px-4">
-            <h1 className="text-3xl font-bold text-indigo-900 mb-4">Genre not found</h1>
-            <p className="text-indigo-600/70">The genre you're looking for doesn't exist or has been moved.</p>
+            <h1 className="text-3xl font-bold text-indigo-900 dark:text-indigo-300 mb-4">Genre not found</h1>
+            <p className="text-indigo-600/70 dark:text-indigo-400/70">The genre you're looking for doesn't exist or has been moved.</p>
           </div>
         </div>
       </HomeLayout>
@@ -207,15 +207,15 @@ export default function GenrePage() {
 
   return (
     <HomeLayout>
-      <div className="min-h-screen bg-gradient-to-b from-white to-indigo-50/50">
+      <div className="min-h-screen bg-gradient-to-b from-white dark:from-background to-indigo-50/50 dark:to-accent/10">
         {/* Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
-            <div className="inline-block p-3 rounded-2xl bg-white/50 backdrop-blur-sm mb-6">
-              <genreInfo.icon className="w-12 h-12 text-indigo-600" />
+            <div className="inline-block p-3 rounded-2xl bg-white/50 dark:bg-white/5 backdrop-blur-sm mb-6">
+              <genreInfo.icon className="w-12 h-12 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <h1 className="text-4xl font-bold text-indigo-900 mb-4">{genreInfo.title}</h1>
-            <p className="text-lg text-indigo-600/70 max-w-2xl mx-auto">
+            <h1 className="text-4xl font-bold text-indigo-900 dark:text-indigo-300 mb-4">{genreInfo.title}</h1>
+            <p className="text-lg text-indigo-600/70 dark:text-indigo-400/70 max-w-2xl mx-auto">
               {genreInfo.description}
             </p>
           </div>
@@ -242,20 +242,20 @@ export default function GenrePage() {
           {/* Loading States */}
           {loading ? (
             <div className="flex flex-col items-center justify-center min-h-[300px]">
-              <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
-              <p className="mt-4 text-lg text-indigo-600/70">Loading books...</p>
+              <Loader2 className="h-10 w-10 animate-spin text-indigo-500 dark:text-indigo-400" />
+              <p className="mt-4 text-lg text-indigo-600/70 dark:text-indigo-400/70">Loading books...</p>
             </div>
           ) : books.length === 0 ? (
             <div className="text-center py-16 px-4">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-12 shadow-xl max-w-md mx-auto border border-indigo-50 ring-1 ring-indigo-100">
+              <div className="bg-white/80 dark:bg-white/5 backdrop-blur-sm rounded-2xl p-12 shadow-xl max-w-md mx-auto border border-indigo-50 dark:border-indigo-500/20 ring-1 ring-indigo-100 dark:ring-indigo-500/10">
                 <div className="relative mb-6">
-                  <Library className="h-20 w-20 mx-auto text-indigo-300" />
-                  <Sparkles className="h-6 w-6 text-indigo-400 absolute top-0 right-1/3 animate-bounce" />
+                  <Library className="h-20 w-20 mx-auto text-indigo-300 dark:text-indigo-400" />
+                  <Sparkles className="h-6 w-6 text-indigo-400 dark:text-indigo-300 absolute top-0 right-1/3 animate-bounce" />
                 </div>
-                <h3 className="text-2xl font-bold text-indigo-900 mb-3">
+                <h3 className="text-2xl font-bold text-indigo-900 dark:text-indigo-300 mb-3">
                   No books found
                 </h3>
-                <p className="text-indigo-600/70 text-lg">
+                <p className="text-indigo-600/70 dark:text-indigo-400/70 text-lg">
                   We couldn't find any books in this genre. Try checking back later.
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default function GenrePage() {
             <>
               {/* Refresh Indicator */}
               {refreshing && (
-                <div className="flex items-center justify-center gap-2 mb-6 text-indigo-600/70">
+                <div className="flex items-center justify-center gap-2 mb-6 text-indigo-600/70 dark:text-indigo-400/70">
                   <RefreshCcw className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Refreshing results...</span>
                 </div>
@@ -299,8 +299,8 @@ export default function GenrePage() {
         </div>
 
         {/* Decorative Elements */}
-        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-br from-indigo-500/30 to-purple-500/30 blur-3xl opacity-20 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-tr from-purple-500/30 to-pink-500/30 blur-3xl opacity-20 animate-pulse delay-1000" />
+        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-br from-indigo-500/30 dark:from-indigo-400/20 to-purple-500/30 dark:to-purple-400/20 blur-3xl opacity-20 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-tr from-purple-500/30 dark:from-purple-400/20 to-pink-500/30 dark:to-pink-400/20 blur-3xl opacity-20 animate-pulse delay-1000" />
 
       </div>
     </HomeLayout>
