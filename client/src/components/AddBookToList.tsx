@@ -123,21 +123,21 @@ export default function AddBookToList({ bookId, onClose }: AddBookToListProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 w-full max-w-md">
+      <div className="bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-purple-200 dark:border-purple-200/50 ring-1 ring-purple-200 dark:ring-purple-200/50 w-full max-w-md">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Add to Reading List</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Add to Reading List</h2>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
             ✕
           </button>
         </div>
         <div className="space-y-4 max-h-[60vh] overflow-y-auto mb-6">
           {loading ? (
-            <div className="flex justify-center">Loading...</div>
+            <div className="flex justify-center text-gray-700 dark:text-gray-300">Loading...</div>
           ) : readingLists.length === 0 ? (
-            <div className="text-center text-gray-500">No reading lists available</div>
+            <div className="text-center text-gray-500 dark:text-gray-400">No reading lists available</div>
           ) : (
             readingLists.map(list => {
               const isBookInList = list.books.includes(bookId);
@@ -145,19 +145,19 @@ export default function AddBookToList({ bookId, onClose }: AddBookToListProps) {
                 <button
                   key={list.id}
                   onClick={() => handleAddToList(list.id)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors text-left group"
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors text-left group"
                 >
                   <div className="flex flex-col gap-2">
-                    <span className="font-medium">{list.name}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{list.name}</span>
                     {list.description && (
-                      <span className="text-sm text-gray-500">{list.description}</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{list.description}</span>
                     )}
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
                       {list.books.length} {list.books.length === 1 ? 'book' : 'books'}
                     </span>
                   </div>
                   {isBookInList && (
-                    <div className="flex items-center gap-2 text-green-600">
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                       <Check className="w-5 h-5" />
                       <span className="text-sm">Added</span>
                     </div>
@@ -167,7 +167,7 @@ export default function AddBookToList({ bookId, onClose }: AddBookToListProps) {
             })
           )}
         </div>
-        <div className="flex gap-2 items-center border-t pt-4">
+        <div className="flex gap-2 items-center border-t border-gray-200 dark:border-gray-700 pt-4">
           <Input
             type="text"
             placeholder="New reading list name"

@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import BookDetails from './pages/BookDetails';
 import GenrePage from './pages/GenrePage';
 import Settings from './pages/Settings';
+import ThemeProvider from './components/providers/ThemeProvider';
 
 export default function App() {
   const { setUser, setLoading, fetchUserData } = useAuthStore();
@@ -30,80 +31,82 @@ export default function App() {
   }, [setUser, setLoading, fetchUserData]);
 
   return (
-    <Router>
-      <Routes>
-        {/* Public routes */}
-        <Route
-          path="/landing"
-          element={
-            <AuthCheck requireAuth={false}>
-              <Landing />
-            </AuthCheck>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <AuthCheck requireAuth={false}>
-              <Login />
-            </AuthCheck>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <AuthCheck requireAuth={false}>
-              <Signup />
-            </AuthCheck>
-          }
-        />
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route
+            path="/landing"
+            element={
+              <AuthCheck requireAuth={false}>
+                <Landing />
+              </AuthCheck>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <AuthCheck requireAuth={false}>
+                <Login />
+              </AuthCheck>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <AuthCheck requireAuth={false}>
+                <Signup />
+              </AuthCheck>
+            }
+          />
 
-        {/* Protected routes */}
-        <Route
-          path="/"
-          element={
-            <AuthCheck>
-              <Home />
-            </AuthCheck>
-          }
-        />
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <AuthCheck>
+                <Home />
+              </AuthCheck>
+            }
+          />
 
-        <Route
-          path="/settings"
-          element={
-            <AuthCheck>
-              <Settings />
-            </AuthCheck>
-          }
-        />
+          <Route
+            path="/settings"
+            element={
+              <AuthCheck>
+                <Settings />
+              </AuthCheck>
+            }
+          />
 
-        <Route
-          path="/genres/:genre"
-          element={
-            <AuthCheck>
-              <GenrePage />
-            </AuthCheck>
-          }
-        />
+          <Route
+            path="/genres/:genre"
+            element={
+              <AuthCheck>
+                <GenrePage />
+              </AuthCheck>
+            }
+          />
 
-        {/* Dynamic protected routes */}
-        <Route
-          path="/profile/:username"
-          element={
-            <AuthCheck>
-              <Profile />
-            </AuthCheck>
-          }
-        />
-        <Route
-          path="/book/:id"
-          element={
-            <AuthCheck>
-              <BookDetails />
-            </AuthCheck>
-          }
-        />
-      </Routes>
-    </Router>
+          {/* Dynamic protected routes */}
+          <Route
+            path="/profile/:username"
+            element={
+              <AuthCheck>
+                <Profile />
+              </AuthCheck>
+            }
+          />
+          <Route
+            path="/book/:id"
+            element={
+              <AuthCheck>
+                <BookDetails />
+              </AuthCheck>
+            }
+          />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }

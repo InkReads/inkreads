@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuthStore } from "@/store/authStore";
+import { useThemeStore } from "@/store/themeStore";
 import HomeLayout from '@/components/layouts/HomeLayout';
 import HomeNavbar from '@/components/HomeNavbar';
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ type SettingsTab = 'account' | 'privacy' | 'display';
 
 export default function Settings() {
   const { userData } = useAuthStore();
+  const { isDarkMode, setDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>('account');
@@ -28,7 +30,6 @@ export default function Settings() {
     email: userData?.email || "",
     bio: userData?.bio || "",
     isPrivate: userData?.isPrivate || false,
-    darkMode: userData?.darkMode || false,
   });
 
   useEffect(() => {
@@ -38,7 +39,6 @@ export default function Settings() {
         email: userData.email,
         bio: userData.bio || "",
         isPrivate: userData.isPrivate || false,
-        darkMode: userData.darkMode || false,
       });
     }
   }, [userData]);
@@ -115,7 +115,7 @@ export default function Settings() {
         username: formData.username,
         bio: formData.bio,
         isPrivate: formData.isPrivate,
-        darkMode: formData.darkMode,
+        darkMode: isDarkMode,
         updatedAt: new Date().toISOString()
       });
       // Redirect to profile page after successful update
@@ -263,22 +263,22 @@ export default function Settings() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <h3 className="text-lg font-semibold">Dark Mode</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="text-lg font-semibold text-foreground">Dark Mode</h3>
+            <p className="text-sm text-muted-foreground">
               Switch between light and dark theme for a more comfortable reading experience.
             </p>
           </div>
           <div className="flex gap-2">
             <Button
-              variant={!formData.darkMode ? "default" : "outline"}
-              onClick={() => setFormData(prev => ({ ...prev, darkMode: false }))}
+              variant={!isDarkMode ? "default" : "outline"}
+              onClick={() => setDarkMode(false)}
               className="w-24"
             >
               Light
             </Button>
             <Button
-              variant={formData.darkMode ? "default" : "outline"}
-              onClick={() => setFormData(prev => ({ ...prev, darkMode: true }))}
+              variant={isDarkMode ? "default" : "outline"}
+              onClick={() => setDarkMode(true)}
               className="w-24"
             >
               Dark
@@ -296,19 +296,19 @@ export default function Settings() {
   return (
     <HomeLayout>
       <HomeNavbar />
-      <main className="flex flex-col min-h-screen bg-gradient-to-b from-white to-indigo-50/50">
+      <main className="flex flex-col min-h-screen bg-gradient-to-b from-background to-accent/50">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col gap-8">
             {/* Settings Card */}
-            <div className="flex flex-col gap-6 bg-white/80 backdrop-blur-sm p-10 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 w-full max-w-5xl mx-auto">
+            <div className="flex flex-col gap-6 bg-card/80 backdrop-blur-sm p-10 rounded-2xl shadow-lg border border-border ring-1 ring-ring/10 w-full max-w-5xl mx-auto">
               {/* Tabs */}
-              <div className="flex gap-8 border-b border-gray-200">
+              <div className="flex gap-8 border-b border-border">
                 <button
                   onClick={() => setActiveTab('account')}
                   className={`pb-4 transition-all ${
                     activeTab === 'account'
-                      ? 'text-2xl font-bold text-black border-b-2 border-black'
-                      : 'text-lg text-gray-500 hover:text-gray-700'
+                      ? 'text-2xl font-bold text-foreground border-b-2 border-foreground'
+                      : 'text-lg text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Account Settings
@@ -317,8 +317,8 @@ export default function Settings() {
                   onClick={() => setActiveTab('privacy')}
                   className={`pb-4 transition-all ${
                     activeTab === 'privacy'
-                      ? 'text-2xl font-bold text-black border-b-2 border-black'
-                      : 'text-lg text-gray-500 hover:text-gray-700'
+                      ? 'text-2xl font-bold text-foreground border-b-2 border-foreground'
+                      : 'text-lg text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Privacy Settings
@@ -327,8 +327,8 @@ export default function Settings() {
                   onClick={() => setActiveTab('display')}
                   className={`pb-4 transition-all ${
                     activeTab === 'display'
-                      ? 'text-2xl font-bold text-black border-b-2 border-black'
-                      : 'text-lg text-gray-500 hover:text-gray-700'
+                      ? 'text-2xl font-bold text-foreground border-b-2 border-foreground'
+                      : 'text-lg text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Display Settings

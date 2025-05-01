@@ -262,7 +262,7 @@ export default function Profile() {
   return (
     <HomeLayout>
       <HomeNavbar />
-      <main className="flex flex-col min-h-screen bg-gradient-to-b from-white to-indigo-50/50">
+      <main className="flex flex-col min-h-screen bg-gradient-to-b from-background to-accent/50">
         {loading ? (
           <div className="flex items-center justify-center min-h-[50vh]">
             Loading...
@@ -275,16 +275,16 @@ export default function Profile() {
           <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col gap-8">
               {/* Top Profile Card - Always visible */}
-              <div className="flex flex-col gap-6 bg-white/80 backdrop-blur-sm p-10 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 w-full max-w-5xl mx-auto">
+              <div className="flex flex-col gap-6 bg-card/80 backdrop-blur-sm p-10 rounded-2xl shadow-lg border border-border ring-1 ring-ring/10 w-full max-w-5xl mx-auto">
                 <div className="flex gap-10">
                   {/* Left side - Profile picture and username */}
                   <div className="flex flex-col items-center gap-6">
                     <Avatar className="w-24 h-24">
-                      <AvatarFallback className="text-4xl bg-black text-white">
+                      <AvatarFallback className="text-4xl bg-foreground text-background">
                         {profile.username.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <h1 className="text-2xl font-bold">{profile.username}</h1>
+                    <h1 className="text-2xl font-bold text-foreground">{profile.username}</h1>
                     {auth.currentUser && auth.currentUser.uid !== profile.uid && (
                       <Button
                         onClick={handleToggleFollow}
@@ -300,12 +300,12 @@ export default function Profile() {
                   <div className="flex flex-col gap-6 flex-1 min-w-0">
                     <div className="flex gap-10">
                       <div className="flex flex-col items-center cursor-pointer" onClick={handleShowFollowers}>
-                        <span className="text-2xl font-bold">{profile.followers.length}</span>
-                        <span className="text-base text-gray-600">followers</span>
+                        <span className="text-2xl font-bold text-foreground">{profile.followers.length}</span>
+                        <span className="text-base text-muted-foreground">followers</span>
                       </div>
                       <div className="flex flex-col items-center cursor-pointer" onClick={handleShowFollowing}>
-                        <span className="text-2xl font-bold">{profile.following.length}</span>
-                        <span className="text-base text-gray-600">following</span>
+                        <span className="text-2xl font-bold text-foreground">{profile.following.length}</span>
+                        <span className="text-base text-muted-foreground">following</span>
                       </div>
                     </div>
                     <div className="mt-4 w-full">
@@ -318,7 +318,7 @@ export default function Profile() {
                             className="min-h-[100px] max-h-[200px] resize-none w-full"
                           />
                           <div className="flex justify-between items-center">
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-muted-foreground">
                               {charCount}/{MAX_CHARS} characters
                               {charCount > MAX_CHARS && (
                                 <span className="text-red-500 ml-2">(Too many characters)</span>
@@ -344,7 +344,7 @@ export default function Profile() {
                         </div>
                       ) : (
                         <div className="flex items-start gap-2 w-full">
-                          <p className="text-gray-700 break-words overflow-hidden overflow-wrap-anywhere w-full">
+                          <p className="text-muted-foreground break-words overflow-hidden overflow-wrap-anywhere w-full">
                             {profile.bio || "No bio available"}
                           </p>
                           {auth.currentUser && auth.currentUser.uid === profile.uid && (
@@ -368,40 +368,40 @@ export default function Profile() {
               {(!profile.isPrivate || (auth.currentUser && auth.currentUser.uid === profile.uid)) ? (
                 <div className="flex gap-10 max-w-5xl mx-auto w-full">
                   {/* Stats Box */}
-                  <div className="flex flex-col gap-6 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 w-1/3">
+                  <div className="flex flex-col gap-6 bg-card/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-border ring-1 ring-ring/10 w-1/3">
                     <div className="flex flex-col gap-8">
                       <div className="flex flex-col gap-2">
-                        <span className="text-base text-gray-500">Joined</span>
-                        <span className="text-lg font-medium">
+                        <span className="text-base text-muted-foreground">Joined</span>
+                        <span className="text-lg font-medium text-foreground">
                           {formatJoinDate(profile.joinDate)}
                         </span>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <span className="text-base text-gray-500">Likes</span>
-                        <span className="text-lg font-medium">{profile.upvotes || 0}</span>
+                        <span className="text-base text-muted-foreground">Likes</span>
+                        <span className="text-lg font-medium text-foreground">{profile.upvotes || 0}</span>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <span className="text-base text-gray-500">Dislikes</span>
-                        <span className="text-lg font-medium">{profile.downvotes || 0}</span>
+                        <span className="text-base text-muted-foreground">Dislikes</span>
+                        <span className="text-lg font-medium text-foreground">{profile.downvotes || 0}</span>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <span className="text-base text-gray-500">Written Reviews</span>
-                        <span className="text-lg font-medium">{profile.reviewCount || 0}</span>
+                        <span className="text-base text-muted-foreground">Written Reviews</span>
+                        <span className="text-lg font-medium text-foreground">{profile.reviewCount || 0}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Reading Lists Box */}
-                  <div className="flex flex-col gap-6 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 flex-1">
-                    <h2 className="text-2xl font-semibold">Reading Lists</h2>
+                  <div className="flex flex-col gap-6 bg-card/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-border ring-1 ring-ring/10 flex-1">
+                    <h2 className="text-2xl font-semibold text-foreground">Reading Lists</h2>
                     <div className="mt-8">
                       {loadingLists ? (
                         <div className="flex justify-center items-center h-32">
-                          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+                          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-foreground"></div>
                         </div>
                       ) : readingLists.length === 0 ? (
                         <div className="text-center py-8">
-                          <p className="text-gray-500">No reading lists yet</p>
+                          <p className="text-muted-foreground">No reading lists yet</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -409,18 +409,18 @@ export default function Profile() {
                             <button
                               key={list.id}
                               onClick={() => setSelectedList(list)}
-                              className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100 hover:ring-2 hover:ring-indigo-200 transition-all duration-300 text-left"
+                              className="bg-card/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-border ring-1 ring-ring/10 hover:ring-2 hover:ring-ring transition-all duration-300 text-left"
                             >
                               <div className="flex flex-col h-full">
                                 <div className="flex items-start justify-between mb-4">
-                                  <h3 className="text-lg font-semibold text-gray-900">{list.name}</h3>
-                                  <div className="flex items-center gap-2 text-indigo-600">
-                                    <BookOpen className="w-5 h-5" />
-                                    <span className="text-sm font-medium">{list.books.length}</span>
+                                  <h3 className="text-lg font-semibold text-foreground">{list.name}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <BookOpen className="w-5 h-5 text-muted-foreground dark:text-white" />
+                                    <span className="text-sm font-medium text-muted-foreground dark:text-white">{list.books.length}</span>
                                   </div>
                                 </div>
                                 {list.description && (
-                                  <p className="text-gray-600 text-sm line-clamp-2">
+                                  <p className="text-muted-foreground text-sm line-clamp-2">
                                     {list.description}
                                   </p>
                                 )}
@@ -434,10 +434,10 @@ export default function Profile() {
                 </div>
               ) : (
                 <div className="flex gap-10 max-w-5xl mx-auto w-full">
-                  <div className="flex-1 bg-white/40 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-indigo-50 ring-1 ring-indigo-100">
+                  <div className="flex-1 bg-card/40 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-border ring-1 ring-ring/10">
                     <div className="text-center py-8">
-                      <h3 className="text-xl font-semibold text-gray-600 mb-2">Private Profile</h3>
-                      <p className="text-gray-500">
+                      <h3 className="text-xl font-semibold text-muted-foreground mb-2">Private Profile</h3>
+                      <p className="text-muted-foreground">
                         This user's stats and reading lists are private
                       </p>
                     </div>
