@@ -7,6 +7,9 @@ interface UserData {
   username: string;
   email: string;
   createdAt: string;
+  bio?: string;
+  isPrivate?: boolean;
+  darkMode?: boolean;
 }
 
 interface AuthStore {

@@ -8,10 +8,10 @@ interface HomeLayoutProps {
 export default function HomeLayout({ children }: HomeLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="w-full">
+      <div className="w-full bg-background text-foreground">
         <HomeNavbar />
         <div className="flex min-h-screen pt-[4rem]">
-          <main className="flex-1 overflow-y-hidden">
+          <main className="flex-1">
             {children}
           </main>
         </div>

@@ -33,7 +33,13 @@
       await setDoc(doc(db, "users", uid), {
         email,
         username,
-        createdAt: new Date().toISOString(),
+        joinDate: new Date().toISOString(),
+        followers: [],
+        following: [],
+        reviewCount: 0,
+        upvotes: [],
+        downvotes: [],
+        readingListsCount: 0
       });
     };
 
