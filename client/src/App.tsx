@@ -11,6 +11,7 @@ import Landing from './pages/Landing';
 import Profile from './pages/Profile';
 import BookDetails from './pages/BookDetails';
 import GenrePage from './pages/GenrePage';
+import Settings from './pages/Settings';
 
 export default function App() {
   const { setUser, setLoading, fetchUserData } = useAuthStore();
@@ -63,6 +64,15 @@ export default function App() {
           element={
             <AuthCheck>
               <Home />
+            </AuthCheck>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <AuthCheck>
+              <Settings />
             </AuthCheck>
           }
         />
