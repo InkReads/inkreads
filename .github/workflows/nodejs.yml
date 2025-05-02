@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -39,10 +41,6 @@ jobs:
         VITE_API_URL: ${{ secrets.VITE_API_URL }}
       run: pnpm run build
         
-    - name: Pull latest changes
-      run: |
-        git pull --rebase origin ${{ github.ref }}
-
     - name: Setup environment variables
       run: |
         # Server environment variables
