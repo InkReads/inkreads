@@ -19,6 +19,7 @@ import {
 import { db } from '@/lib/firebase';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import { useAuthStore } from '@/store/authStore';
+
 import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award, Tag, Plus } from 'lucide-react';
 import { BookOpen as LucideBookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -76,7 +77,9 @@ export default function BookDetails() {
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [hasMoreReviews, setHasMoreReviews] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
+
   const [showAddToList, setShowAddToList] = useState(false);
+
 
   // Fetch book details
   useEffect(() => {
@@ -89,6 +92,7 @@ export default function BookDetails() {
         const bookData = searchParams.get('data');
         if (bookData) {
           const parsedBook = JSON.parse(decodeURIComponent(bookData));
+
           
           // Check Firestore for existing document
           const bookRef = doc(db, 'books', id);
@@ -110,6 +114,7 @@ export default function BookDetails() {
             ...parsedBook,
             upvotes: firestoreData.upvotes || [],
             downvotes: firestoreData.downvotes || []
+
           });
           return;
         }
@@ -120,6 +125,7 @@ export default function BookDetails() {
         // Check Firestore for votes
         const bookRef = doc(db, 'books', id);
         const bookDoc = await getDoc(bookRef);
+
         
         if (!bookDoc.exists()) {
           // Create book document if it doesn't exist
@@ -141,6 +147,7 @@ export default function BookDetails() {
       } catch (error) {
         console.error('Error fetching book:', error);
         setError('Failed to load book');
+
       } finally {
         setLoading(false);
       }
@@ -187,6 +194,7 @@ export default function BookDetails() {
 
     try {
       const bookRef = doc(db, 'books', book.id);
+
       const userId = user.uid;
 
       // Get the current document
@@ -198,6 +206,7 @@ export default function BookDetails() {
       const downvotes = Array.isArray(currentData.downvotes) ? currentData.downvotes : [];
 
       // Calculate new vote state
+
       let newUpvotes = [...upvotes];
       let newDownvotes = [...downvotes];
 
@@ -217,6 +226,7 @@ export default function BookDetails() {
         }
       }
 
+
       // Update Firestore with all necessary fields
       await setDoc(bookRef, {
         upvotes: newUpvotes,
@@ -226,6 +236,7 @@ export default function BookDetails() {
       }, { merge: true });
 
       // Update local state only after successful Firestore update
+
       setBook(prev => prev ? {
         ...prev,
         upvotes: newUpvotes,
@@ -233,7 +244,9 @@ export default function BookDetails() {
       } : null);
     } catch (error) {
       console.error('Error voting:', error);
+
       // Optionally show error to user
+
     }
   };
 
@@ -304,10 +317,12 @@ export default function BookDetails() {
         downvotes: []
       };
 
+
       // Save review to Firestore
       await setDoc(reviewRef, newReview);
 
       // Update local state
+
       setReviews(prev => [newReview, ...prev]);
       setReviewContent('');
       setIsWritingReview(false);
@@ -362,6 +377,7 @@ export default function BookDetails() {
   if (loading) {
     return (
       <HomeLayout>
+
         <div className="h-full bg-gradient-to-b from-background to-accent/50 animate-pulse">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col lg:flex-row gap-12">
@@ -373,6 +389,7 @@ export default function BookDetails() {
                   <div className="h-4 bg-muted rounded w-full" />
                   <div className="h-4 bg-muted rounded w-5/6" />
                   <div className="h-4 bg-muted rounded w-4/6" />
+
                 </div>
               </div>
             </div>
@@ -385,6 +402,7 @@ export default function BookDetails() {
   if (error || !book) {
     return (
       <HomeLayout>
+
         <div className="h-full bg-gradient-to-b from-background to-accent/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center py-16">
@@ -392,6 +410,7 @@ export default function BookDetails() {
                 {error || 'Book not found'}
               </h2>
               <p className="text-muted-foreground">
+
                 We couldn't find the book you're looking for.
               </p>
             </div>
@@ -403,6 +422,7 @@ export default function BookDetails() {
 
   return (
     <HomeLayout>
+
       {/* Background with gradient */}
       <div className="relative bg-gradient-to-b from-background to-accent/50 dark:from-background dark:to-accent/10">
         {/* Blur Effect Background */}

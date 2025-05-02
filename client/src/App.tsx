@@ -13,8 +13,10 @@ import BookDetails from './pages/BookDetails';
 import GenrePage from './pages/GenrePage';
 import UserFanfictionsPage from './pages/UserFanfictionsPage';
 import CreateFanfictionPage from './pages/CreateFanfictionPage';
+
 import Settings from './pages/Settings';
 import ThemeProvider from './components/providers/ThemeProvider';
+
 
 export default function App() {
   const { setUser, setLoading, fetchUserData } = useAuthStore();

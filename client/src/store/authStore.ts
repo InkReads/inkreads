@@ -10,6 +10,7 @@ interface UserData {
   bio?: string;
   isPrivate?: boolean;
   darkMode?: boolean;
+
 }
 
 interface AuthStore {

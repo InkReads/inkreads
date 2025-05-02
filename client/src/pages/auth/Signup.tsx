@@ -40,6 +40,7 @@
         upvotes: [],
         downvotes: [],
         readingListsCount: 0
+
       });
     };
 

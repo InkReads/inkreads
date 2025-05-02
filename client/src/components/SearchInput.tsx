@@ -1,4 +1,5 @@
 import { Input } from '@/components/ui/input'
+
 import { SearchIcon, Loader2 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -22,6 +23,7 @@ interface User {
   username: string
   displayName: string
   photoURL?: string
+
 }
 
 export default function SearchInput() {
@@ -103,6 +105,7 @@ export default function SearchInput() {
 
   const handleUserSelect = (user: User) => {
     router(`/profile/${user.username}`)
+
     setShowResults(false)
     setSearchQuery("")
   }
@@ -113,6 +116,7 @@ export default function SearchInput() {
       handleBookSelect(books[0])
     } else if (users.length > 0) {
       handleUserSelect(users[0])
+
     }
   }
 
@@ -120,6 +124,7 @@ export default function SearchInput() {
     <div className="relative w-full max-w-sm">
       <form className="flex relative w-full max-w-sm items-center gap-1.5" onSubmit={handleSubmit}>
         <div className="absolute left-2.5 top-2 text-muted-foreground">
+
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -128,6 +133,8 @@ export default function SearchInput() {
         </div>
         <Input
           placeholder="Search"
+
+
           className="bg-white w-[10rem] sm:w-[18rem] lg:w-[24rem] h-10 shadow-none pl-10 text-black border-gray-300"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -135,6 +142,7 @@ export default function SearchInput() {
         />
       </form>
       
+
       {showResults && searchQuery && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg z-50 max-h-[400px] overflow-y-auto">
           <div className="py-2">

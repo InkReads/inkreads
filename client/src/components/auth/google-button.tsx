@@ -23,6 +23,7 @@ export default function GoogleAuthButton() {
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         username: user.displayName || user.email?.split('@')[0],
+
         joinDate: new Date().toISOString(),
         followers: [],
         following: [],
@@ -30,6 +31,7 @@ export default function GoogleAuthButton() {
         upvotes: [],
         downvotes: [],
         readingListsCount: 0
+
       });
 
       setUser(user);

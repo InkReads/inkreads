@@ -4,11 +4,13 @@ import { db, auth } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+
 import { BookOpen } from "lucide-react";
 import HomeLayout from '@/components/layouts/HomeLayout';
 import HomeNavbar from '@/components/HomeNavbar';
 import UserListBox from '@/components/UserListBox';
 import ProfileReadingLists from '@/components/ProfileReadingLists';
+
 
 interface UserProfile {
   uid: string;
@@ -16,6 +18,7 @@ interface UserProfile {
   email: string;
   followers: string[];
   following: string[];
+
   bio?: string;
   joinDate?: string;
   reviewCount?: number;
@@ -42,6 +45,7 @@ const formatJoinDate = (dateString?: string) => {
   });
 };
 
+
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -61,6 +65,7 @@ export default function Profile() {
     checkOwnProfile();
   }, [profile]);
 
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (!username) return;
@@ -72,6 +77,7 @@ export default function Profile() {
         
         if (!querySnapshot.empty) {
           const userData = querySnapshot.docs[0].data() as UserProfile;
+
           
           // Fetch all books that this user has voted on
           const booksRef = collection(db, "books");
@@ -97,15 +103,17 @@ export default function Profile() {
           const reviewsRef = collection(db, "reviews");
           const reviewsQuery = query(reviewsRef, where("userId", "==", userId));
           const reviewsSnapshot = await getDocs(reviewsQuery);
-          
+
           setProfile({
             ...userData,
             uid: querySnapshot.docs[0].id,
             followers: userData.followers || [],
+
             following: userData.following || [],
             upvotes: totalUpvoted,
             downvotes: totalDownvoted,
             reviewCount: reviewsSnapshot.size
+
           });
         }
       } catch (error) {
@@ -117,6 +125,7 @@ export default function Profile() {
 
     fetchProfile();
   }, [username]);
+
 
   useEffect(() => {
     const fetchReadingLists = async () => {
@@ -143,6 +152,7 @@ export default function Profile() {
 
     fetchReadingLists();
   }, [profile?.uid]);
+
 
   const handleToggleFollow = async () => {
     const currentUser = auth.currentUser;
@@ -182,6 +192,7 @@ export default function Profile() {
       console.error("Toggle follow error:", error);
     }
   };
+
 
   const handleShowFollowers = () => {
     if (profile) {
@@ -225,6 +236,7 @@ export default function Profile() {
     <HomeLayout>
       <HomeNavbar />
       <main className="flex flex-col min-h-screen bg-gradient-to-b from-background to-accent/50">
+
         {loading ? (
           <div className="flex items-center justify-center min-h-[50vh]">
             Loading...
@@ -235,6 +247,7 @@ export default function Profile() {
           </div>
         ) : (
           <div className="container mx-auto px-4 py-8">
+
             <div className="flex flex-col gap-8">
               {/* Top Profile Card - Always visible */}
               <div className="flex flex-col gap-6 bg-card/80 backdrop-blur-sm p-10 rounded-2xl shadow-lg border border-border ring-1 ring-ring/10 w-full max-w-5xl mx-auto">
@@ -374,6 +387,7 @@ export default function Profile() {
                 onDelete={isOwnProfile ? handleDeleteList : undefined}
               />
             )}
+
           </div>
         )}
       </main>
