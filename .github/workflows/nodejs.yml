@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, test_workflow ]
 
+# Cancel in-progress runs when a new workflow with the same concurrency group is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: [self-hosted, example2]
@@ -46,7 +51,8 @@ jobs:
     steps:
     - name: Pull latest changes
       run: |
-        git pull origin ${{ github.ref }}
+        git fetch origin ${{ github.ref }}
+        git reset --hard FETCH_HEAD
         
     - name: Setup environment variables
       run: |
