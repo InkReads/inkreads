@@ -2,12 +2,12 @@ name: Node.js CI & Deployment
 
 on:
   push:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, fixMerge ]
   pull_request:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, fixMerge ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: [self-hosted, example2]
 
     strategy:
@@ -38,16 +38,11 @@ jobs:
         GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
         VITE_API_URL: ${{ secrets.VITE_API_URL }}
       run: pnpm run build
-
-  deploy:
-    needs: build
-    runs-on: [self-hosted, example2]
- 
-    steps:
+        
     - name: Pull latest changes
       run: |
         git pull --rebase origin ${{ github.ref }}
-        
+
     - name: Setup environment variables
       run: |
         # Server environment variables
