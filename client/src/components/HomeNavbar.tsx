@@ -16,7 +16,7 @@ import { auth } from '@/lib/firebase';
 // import { SidebarTrigger } from '@/components/ui/sidebar';
 import SearchInput from '@/components/SearchInput';
 import logo from '@/assets/icons/black-logo.png';
-
+//Generes
 const NAVIGATION_SECTIONS = [
   { "Community": ["Stories", "Authors", "Users"] },
   { "Browse": ["Novels", "Light Novels", "Comics", "Manga", "Fanfiction"] },
@@ -31,11 +31,12 @@ interface NavDropdownProps {
 }
 
 export default function HomeNavbar() {
-  const { user } = useAuthStore();
+  const { user } = useAuthStore(); 
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-white shadow-sm">
       <header className="w-full flex gap-4 items-center">
+
         {/* Logo Section */}
         <div className="flex gap-2 items-center">
           {/** user && <SidebarTrigger className="hover:cursor-pointer" /> **/}
@@ -43,7 +44,7 @@ export default function HomeNavbar() {
             <img src={logo} alt="logo-image" width={70} className="mt-2" />
           </div>
           <Link to="/">
-            <span className="text-2xl">InkReads</span>
+            <span className="text-2xl text-foreground">InkReads</span>
           </Link>
         </div>
       </header>
@@ -76,7 +77,7 @@ function NavDropdown({ section }: NavDropdownProps) {
           </Button>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-white border-[#e5e7eb] shadow-md">
+      <DropdownMenuContent className="bg-card/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
         <div className="flex flex-col">
           {items.map((item: string, index: number) => (
             <Button 
@@ -125,11 +126,11 @@ function UserMenu() {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white border-[#e5e7eb] shadow-md">
+      <DropdownMenuContent align="end" className="bg-card/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
         <DropdownMenuLabel className="font-bold">
           {userData?.username}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="w-full ml-0 bg-gray-300"/>
+        <DropdownMenuSeparator className="w-full ml-0 bg-border"/>
         <section className="flex flex-col items-start">
           {menuItems.map((item, index) => (
             <Button 
