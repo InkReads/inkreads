@@ -6,13 +6,13 @@ on:
   pull_request:
     branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, test_workflow ]
 
-# Cancel in-progress runs when a new workflow with the same concurrency group is triggered
+# Ensure only one workflow runs at a time per branch
 concurrency: 
-      group: ci-${{ github.ref }}
-      cancel-in-progress: true
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: [self-hosted, example2]
 
     strategy:
@@ -44,16 +44,6 @@ jobs:
         VITE_API_URL: ${{ secrets.VITE_API_URL }}
       run: pnpm run build
 
-  deploy:
-    needs: build
-    runs-on: [self-hosted, example2]
- 
-    steps:
-    - name: Pull latest changes
-      run: |
-        git fetch origin ${{ github.ref }}
-        git reset --hard FETCH_HEAD
-        
     - name: Setup environment variables
       run: |
         # Server environment variables
