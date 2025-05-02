@@ -2,12 +2,17 @@ name: Node.js CI & Deployment
 
 on:
   push:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, test_workflow ]
   pull_request:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions ]
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, test_workflow ]
+
+# Ensure only one workflow runs at a time per branch
+concurrency: 
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: [self-hosted, example2]
 
     strategy:
@@ -16,6 +21,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for all branches
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -39,15 +46,6 @@ jobs:
         VITE_API_URL: ${{ secrets.VITE_API_URL }}
       run: pnpm run build
 
-  deploy:
-    needs: build
-    runs-on: [self-hosted, example2]
- 
-    steps:
-    - name: Pull latest changes
-      run: |
-        git pull origin ${{ github.ref }}
-        
     - name: Setup environment variables
       run: |
         # Server environment variables
