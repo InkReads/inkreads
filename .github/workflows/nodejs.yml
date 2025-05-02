@@ -2,14 +2,11 @@ name: Node.js CI & Deployment
 
 on:
   push:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, test_workflow ]
-  pull_request:
-    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, test_workflow ]
 
-# Ensure only one workflow runs at a time per branch
-concurrency: 
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, fixMerge ]
+  pull_request:
+    branches: [ main, feat/migrate-react-flask, ai-genre-tag, customFanfictions, fixMerge ]
+
 
 jobs:
   build-and-deploy:
@@ -22,7 +19,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Fetch all history for all branches
+
+        fetch-depth: 0  # Fetch all history
+
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -44,7 +43,16 @@ jobs:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
         VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+        VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+        VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+        VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+        VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
       run: pnpm run build
+        
 
     - name: Setup environment variables
       run: |
@@ -70,6 +78,15 @@ jobs:
         # Client environment variables
         cd ../client
         echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env
+
+        echo "VITE_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> .env
+        echo "VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}" >> .env
+        echo "VITE_FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
+        echo "VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env
+        echo "VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "VITE_FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}" >> .env
+        echo "VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.FIREBASE_MEASUREMENT_ID }}" >> .env
+
         
     - name: Setup Python environment
       run: |

@@ -19,10 +19,12 @@ import {
 import { db } from '@/lib/firebase';
 import HomeLayout from '@/components/layouts/HomeLayout';
 import { useAuthStore } from '@/store/authStore';
-import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award, Tag } from 'lucide-react';
+
+import { Star, ThumbsUp, ThumbsDown, Calendar, Share2, MessageSquare, Bookmark, Award, Tag, Plus } from 'lucide-react';
 import { BookOpen as LucideBookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getBookById } from '@/lib/api';
+import AddBookToList from '@/components/AddBookToList';
 
 interface BookVolumeInfo {
   title: string;
@@ -76,6 +78,9 @@ export default function BookDetails() {
   const [hasMoreReviews, setHasMoreReviews] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  const [showAddToList, setShowAddToList] = useState(false);
+
+
   // Fetch book details
   useEffect(() => {
     async function fetchBook() {
@@ -87,11 +92,29 @@ export default function BookDetails() {
         const bookData = searchParams.get('data');
         if (bookData) {
           const parsedBook = JSON.parse(decodeURIComponent(bookData));
-          // Initialize votes if not present
+
+          
+          // Check Firestore for existing document
+          const bookRef = doc(db, 'books', id);
+          const bookDoc = await getDoc(bookRef);
+          
+          if (!bookDoc.exists()) {
+            // Create book document if it doesn't exist
+            await setDoc(bookRef, {
+              upvotes: [],
+              downvotes: [],
+              volumeInfo: parsedBook.volumeInfo
+            });
+          }
+
+          const firestoreData = bookDoc.exists() ? bookDoc.data() : { upvotes: [], downvotes: [] };
+
+          // Merge API data with Firestore data
           setBook({
             ...parsedBook,
-            upvotes: [],
-            downvotes: []
+            upvotes: firestoreData.upvotes || [],
+            downvotes: firestoreData.downvotes || []
+
           });
           return;
         }
@@ -102,16 +125,29 @@ export default function BookDetails() {
         // Check Firestore for votes
         const bookRef = doc(db, 'books', id);
         const bookDoc = await getDoc(bookRef);
-        const firestoreData = bookDoc.exists() ? bookDoc.data() : null;
 
+        
+        if (!bookDoc.exists()) {
+          // Create book document if it doesn't exist
+          await setDoc(bookRef, {
+            upvotes: [],
+            downvotes: [],
+            volumeInfo: apiData.volumeInfo
+          });
+        }
+
+        const firestoreData = bookDoc.exists() ? bookDoc.data() : { upvotes: [], downvotes: [] };
+
+        // Merge API data with Firestore data
         setBook({
           ...apiData,
-          upvotes: firestoreData?.upvotes || [],
-          downvotes: firestoreData?.downvotes || []
+          upvotes: firestoreData.upvotes || [],
+          downvotes: firestoreData.downvotes || []
         });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load book');
-        console.error('Error fetching book:', err);
+      } catch (error) {
+        console.error('Error fetching book:', error);
+        setError('Failed to load book');
+
       } finally {
         setLoading(false);
       }
@@ -158,20 +194,18 @@ export default function BookDetails() {
 
     try {
       const bookRef = doc(db, 'books', book.id);
+
+      const userId = user.uid;
+
+      // Get the current document
       const bookDoc = await getDoc(bookRef);
       
-      if (!bookDoc.exists()) {
-        // Create book document if it doesn't exist
-        await setDoc(bookRef, {
-          upvotes: [],
-          downvotes: [],
-          volumeInfo: book.volumeInfo
-        });
-      }
+      // Initialize arrays if they don't exist
+      const currentData = bookDoc.exists() ? bookDoc.data() : {};
+      const upvotes = Array.isArray(currentData.upvotes) ? currentData.upvotes : [];
+      const downvotes = Array.isArray(currentData.downvotes) ? currentData.downvotes : [];
 
-      const upvotes = book.upvotes || [];
-      const downvotes = book.downvotes || [];
-      const userId = user.uid;
+      // Calculate new vote state
 
       let newUpvotes = [...upvotes];
       let newDownvotes = [...downvotes];
@@ -192,10 +226,16 @@ export default function BookDetails() {
         }
       }
 
-      await updateDoc(bookRef, {
+
+      // Update Firestore with all necessary fields
+      await setDoc(bookRef, {
         upvotes: newUpvotes,
-        downvotes: newDownvotes
-      });
+        downvotes: newDownvotes,
+        volumeInfo: book.volumeInfo,
+        lastUpdated: new Date().toISOString()
+      }, { merge: true });
+
+      // Update local state only after successful Firestore update
 
       setBook(prev => prev ? {
         ...prev,
@@ -204,6 +244,9 @@ export default function BookDetails() {
       } : null);
     } catch (error) {
       console.error('Error voting:', error);
+
+      // Optionally show error to user
+
     }
   };
 
@@ -274,7 +317,12 @@ export default function BookDetails() {
         downvotes: []
       };
 
+
+      // Save review to Firestore
       await setDoc(reviewRef, newReview);
+
+      // Update local state
+
       setReviews(prev => [newReview, ...prev]);
       setReviewContent('');
       setIsWritingReview(false);
@@ -329,17 +377,19 @@ export default function BookDetails() {
   if (loading) {
     return (
       <HomeLayout>
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white animate-pulse">
+
+        <div className="h-full bg-gradient-to-b from-background to-accent/50 animate-pulse">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col lg:flex-row gap-12">
-              <div className="w-[280px] h-[420px] bg-slate-200 rounded-2xl" />
+              <div className="w-[280px] h-[420px] bg-muted rounded-2xl" />
               <div className="flex-1 space-y-8">
-                <div className="h-12 bg-slate-200 rounded-lg w-3/4" />
-                <div className="h-6 bg-slate-200 rounded-lg w-1/2" />
+                <div className="h-12 bg-muted rounded-lg w-3/4" />
+                <div className="h-6 bg-muted rounded-lg w-1/2" />
                 <div className="space-y-4">
-                  <div className="h-4 bg-slate-200 rounded w-full" />
-                  <div className="h-4 bg-slate-200 rounded w-5/6" />
-                  <div className="h-4 bg-slate-200 rounded w-4/6" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-5/6" />
+                  <div className="h-4 bg-muted rounded w-4/6" />
+
                 </div>
               </div>
             </div>
@@ -352,13 +402,15 @@ export default function BookDetails() {
   if (error || !book) {
     return (
       <HomeLayout>
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+
+        <div className="h-full bg-gradient-to-b from-background to-accent/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center py-16">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-2xl font-bold text-foreground mb-4">
                 {error || 'Book not found'}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
+
                 We couldn't find the book you're looking for.
               </p>
             </div>
@@ -370,299 +422,320 @@ export default function BookDetails() {
 
   return (
     <HomeLayout>
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-        {/* Hero Section with Blur Effect */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 -z-10">
-            <img
-              src={book.volumeInfo.imageLinks?.thumbnail}
-              alt={book.volumeInfo.title}
-              className="w-full h-full object-cover blur-2xl opacity-10 scale-110"
-            />
-          </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col lg:flex-row gap-12 items-start"
-            >
-              {/* Book Cover Section */}
-              <div className="relative flex-shrink-0 w-[280px] mx-auto lg:mx-0">
-                <motion.div 
-                  whileHover={{ scale: 1.05 }}
-                  className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl"
-                >
-                  <img
-                    src={book.volumeInfo.imageLinks?.thumbnail}
-                    alt={book.volumeInfo.title}
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-
-                {/* Rating Badge */}
-                <div className="absolute -top-3 -right-3 bg-white rounded-full p-3 shadow-lg">
-                  <div className="flex items-center gap-1.5">
-                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                    <span className="font-semibold text-gray-800">4.5</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="absolute -left-3 top-1/4 space-y-3">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="p-3 bg-white rounded-full shadow-lg text-indigo-600 hover:text-indigo-700"
-                    onClick={() => setIsBookmarked(!isBookmarked)}
-                  >
-                    <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="p-3 bg-white rounded-full shadow-lg text-indigo-600 hover:text-indigo-700"
-                    onClick={() => setShowShareMenu(!showShareMenu)}
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* Book Info Section */}
-              <div className="flex-1 space-y-8">
-                <div>
-                  <h1 className="text-4xl font-bold text-gray-900 font-dmSans mb-4">
-                    {book.volumeInfo.title}
-                  </h1>
-                  <p className="text-lg text-indigo-600 font-medium">
-                    by {book.volumeInfo.authors?.join(", ")}
-                  </p>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <Calendar className="w-5 h-5 text-indigo-500" />
-                      <div>
-                        <p className="text-sm text-gray-500">Published</p>
-                        <p className="font-semibold">{new Date(book.volumeInfo.publishedDate).getFullYear()}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <LucideBookOpen className="w-5 h-5 text-indigo-500" />
-                      <div>
-                        <p className="text-sm text-gray-500">Read Time</p>
-                        <p className="font-semibold">5h 23m</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <MessageSquare className="w-5 h-5 text-indigo-500" />
-                      <div>
-                        <p className="text-sm text-gray-500">Reviews</p>
-                        <p className="font-semibold">{reviews.length}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-3 text-gray-600">
-                      <Award className="w-5 h-5 text-indigo-500" />
-                      <div>
-                        <p className="text-sm text-gray-500">Rating</p>
-                        <p className="font-semibold">4.5/5</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div className="bg-white rounded-xl p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">About this book</h2>
-                  <p className="text-gray-600 leading-relaxed">
-                    {book.volumeInfo.description}
-                  </p>
-                  
-                  {/* Genre Tags */}
-                  {book.volumeInfo.genre_tags && book.volumeInfo.genre_tags.length > 0 && (
-                    <div className="mt-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Genres</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {book.volumeInfo.genre_tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors duration-300"
-                          >
-                            <Tag className="w-4 h-4" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-4">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleBookVote('upvote')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                      book.upvotes?.includes(user?.uid || '') 
-                        ? "bg-indigo-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <ThumbsUp className={`w-5 h-5 ${book.upvotes?.includes(user?.uid || '') ? "fill-white" : ""}`} />
-                    <span>{book.upvotes?.length || 0}</span>
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleBookVote('downvote')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                      book.downvotes?.includes(user?.uid || '')
-                        ? "bg-red-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <ThumbsDown className={`w-5 h-5 ${book.downvotes?.includes(user?.uid || '') ? "fill-white" : ""}`} />
-                    <span>{book.downvotes?.length || 0}</span>
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+      {/* Background with gradient */}
+      <div className="relative bg-gradient-to-b from-background to-accent/50 dark:from-background dark:to-accent/10">
+        {/* Blur Effect Background */}
+        <div className="fixed inset-0 -z-10">
+          <img
+            src={book.volumeInfo.imageLinks?.thumbnail}
+            alt={book.volumeInfo.title}
+            className="w-full h-full object-cover blur-2xl opacity-10 scale-110"
+          />
         </div>
 
-        {/* Reviews Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Reviews</h2>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsWritingReview(true)}
-              className="px-6 py-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors duration-300"
-            >
-              Write a Review
-            </motion.button>
-          </div>
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Book Info Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col lg:flex-row gap-12 items-start"
+          >
+            {/* Book Cover Section */}
+            <div className="relative flex-shrink-0 w-[280px] mx-auto lg:mx-0">
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl"
+              >
+                <img
+                  src={book.volumeInfo.imageLinks?.thumbnail}
+                  alt={book.volumeInfo.title}
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
 
-          {/* Review Form */}
-          {isWritingReview && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl p-6 shadow-sm mb-8"
-            >
-              <textarea
-                value={reviewContent}
-                onChange={(e) => setReviewContent(e.target.value)}
-                placeholder="Share your thoughts about this book..."
-                className="w-full h-32 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-              />
-              <div className="flex justify-end gap-4 mt-4">
-                <button
-                  onClick={() => setIsWritingReview(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              {/* Rating Badge */}
+              <div className="absolute -top-3 -right-3 bg-card rounded-full p-3 shadow-lg">
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                  <span className="font-semibold text-foreground">4.5</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="absolute -left-3 top-1/4 space-y-3">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-3 bg-card rounded-full shadow-lg hover:text-accent-foreground/90 border border-border"
+                  onClick={() => setIsBookmarked(!isBookmarked)}
                 >
-                  Cancel
-                </button>
+                  <Bookmark className={`w-5 h-5 text-indigo-600 dark:text-indigo-400 ${isBookmarked ? 'fill-indigo-600 dark:fill-indigo-400' : ''}`} />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-3 bg-card rounded-full shadow-lg hover:text-accent-foreground/90 border border-border"
+                  onClick={() => setShowShareMenu(!showShareMenu)}
+                >
+                  <Share2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Book Info Section */}
+            <div className="flex-1 space-y-8">
+              <div>
+                <h1 className="text-4xl font-bold text-foreground font-dmSans mb-4">
+                  {book.volumeInfo.title}
+                </h1>
+                <p className="text-lg text-indigo-600 dark:text-indigo-400 font-medium">
+                  by {book.volumeInfo.authors?.join(", ")}
+                </p>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                  <div className="flex items-center gap-3 text-foreground">
+                    <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Published</p>
+                      <p className="font-semibold">{new Date(book.volumeInfo.publishedDate).getFullYear()}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                  <div className="flex items-center gap-3 text-foreground">
+                    <LucideBookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Read Time</p>
+                      <p className="font-semibold">5h 23m</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                  <div className="flex items-center gap-3 text-foreground">
+                    <MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Reviews</p>
+                      <p className="font-semibold">{reviews.length}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                  <div className="flex items-center gap-3 text-foreground">
+                    <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Rating</p>
+                      <p className="font-semibold">4.5/5</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
+                <h2 className="text-xl font-semibold text-foreground mb-4">About this book</h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  {book.volumeInfo.description}
+                </p>
+                
+                {/* Genre Tags */}
+                {book.volumeInfo.genre_tags && book.volumeInfo.genre_tags.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">Genres</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {book.volumeInfo.genre_tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                        >
+                          <Tag className="w-4 h-4" />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-4 mt-6">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={handleSubmitReview}
-                  disabled={submittingReview || !reviewContent.trim()}
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors duration-300 disabled:opacity-50"
+                  onClick={() => handleBookVote('upvote')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                    book.upvotes?.includes(user?.uid || '')
+                      ? "bg-green-600 text-white"
+                      : "bg-card text-foreground hover:bg-accent/10 border border-border"
+                  }`}
                 >
-                  {submittingReview ? 'Posting...' : 'Post Review'}
+                  <ThumbsUp className={`w-5 h-5 ${book.upvotes?.includes(user?.uid || '') ? "fill-white" : ""}`} />
+                  <span>{book.upvotes?.length || 0}</span>
                 </motion.button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Reviews List */}
-          <div className="space-y-6">
-            {reviews.length > 0 ? (
-              reviews.map((review) => (
-                <motion.div
-                  key={review.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-xl p-6 shadow-sm"
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleBookVote('downvote')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                    book.downvotes?.includes(user?.uid || '')
+                      ? "bg-red-600 text-white"
+                      : "bg-card text-foreground hover:bg-accent/10 border border-border"
+                  }`}
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{review.username}</h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    {user?.uid === review.userId && (
-                      <button
-                        onClick={() => handleDeleteReview(review.id)}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-gray-600 mb-4">{review.content}</p>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => handleReviewVote(review.id, 'upvote')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
-                        review.upvotes.includes(user?.uid || '')
-                          ? "bg-indigo-600 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      <ThumbsUp className="w-4 h-4" />
-                      <span>{review.upvotes.length}</span>
-                    </button>
-                    <button
-                      onClick={() => handleReviewVote(review.id, 'downvote')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
-                        review.downvotes.includes(user?.uid || '')
-                          ? "bg-red-600 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      <ThumbsDown className="w-4 h-4" />
-                      <span>{review.downvotes.length}</span>
-                    </button>
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No reviews yet. Be the first to share your thoughts!</p>
+                  <ThumbsDown className={`w-5 h-5 ${book.downvotes?.includes(user?.uid || '') ? "fill-white" : ""}`} />
+                  <span>{book.downvotes?.length || 0}</span>
+                </motion.button>
+                {user && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowAddToList(true)}
+                    className="flex items-center gap-2 px-6 py-3 rounded-full font-medium bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-400 dark:hover:bg-indigo-500 text-white transition-all duration-300"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Add to List</span>
+                  </motion.button>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          </motion.div>
 
-          {/* Load More Button */}
-          {hasMoreReviews && (
-            <div className="text-center mt-8">
+          {/* Reviews Section */}
+          <div className="mt-16">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-foreground">Reviews</h2>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleLoadMoreReviews}
-                disabled={loadingReviews}
-                className="px-6 py-2.5 bg-white text-indigo-600 border border-indigo-600 rounded-full hover:bg-indigo-50 transition-colors duration-300"
+                onClick={() => setIsWritingReview(true)}
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-400 dark:hover:bg-indigo-500 text-white rounded-full transition-colors duration-300"
               >
-                {loadingReviews ? 'Loading...' : 'Load More Reviews'}
+                Write a Review
               </motion.button>
             </div>
-          )}
+
+            {/* Review Form */}
+            {isWritingReview && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card rounded-xl p-6 shadow-sm mb-8"
+              >
+                <textarea
+                  value={reviewContent}
+                  onChange={(e) => setReviewContent(e.target.value)}
+                  placeholder="Share your thoughts about this book..."
+                  className="w-full h-32 p-4 bg-background text-foreground border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
+                />
+                <div className="flex justify-end gap-4 mt-4">
+                  <button
+                    onClick={() => setIsWritingReview(false)}
+                    className="px-4 py-2 text-muted-foreground hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSubmitReview}
+                    disabled={submittingReview || !reviewContent.trim()}
+                    className="px-6 py-2 bg-accent text-accent-foreground rounded-full hover:bg-accent/90 transition-colors duration-300 disabled:opacity-50"
+                  >
+                    {submittingReview ? 'Posting...' : 'Post Review'}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Reviews List */}
+            <div className="space-y-6">
+              {reviews.length > 0 ? (
+                reviews.map((review) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-card rounded-xl p-6 shadow-sm"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{review.username}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      {user?.uid === review.userId && (
+                        <button
+                          onClick={() => handleDeleteReview(review.id)}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-muted-foreground mb-4">{review.content}</p>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => handleReviewVote(review.id, 'upvote')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+                          review.upvotes.includes(user?.uid || '')
+                            ? "bg-accent text-accent-foreground"
+                            : "bg-card text-foreground hover:bg-accent/10"
+                        }`}
+                      >
+                        <ThumbsUp className="w-4 h-4" />
+                        <span>{review.upvotes.length}</span>
+                      </button>
+                      <button
+                        onClick={() => handleReviewVote(review.id, 'downvote')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+                          review.downvotes.includes(user?.uid || '')
+                            ? "bg-red-600 text-white"
+                            : "bg-card text-foreground hover:bg-accent/10"
+                        }`}
+                      >
+                        <ThumbsDown className="w-4 h-4" />
+                        <span>{review.downvotes.length}</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No reviews yet. Be the first to share your thoughts!</p>
+                </div>
+              )}
+            </div>
+
+            {/* Load More Button */}
+            {hasMoreReviews && (
+              <div className="text-center mt-8">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLoadMoreReviews}
+                  disabled={loadingReviews}
+                  className="px-6 py-2.5 bg-card text-accent border border-accent rounded-full hover:bg-accent/10 transition-colors duration-300"
+                >
+                  {loadingReviews ? 'Loading...' : 'Load More Reviews'}
+                </motion.button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {showAddToList && book && (
+        <AddBookToList
+          bookId={book.id}
+          onClose={() => setShowAddToList(false)}
+        />
+      )}
     </HomeLayout>
   );
 } 

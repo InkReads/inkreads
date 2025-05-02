@@ -69,12 +69,17 @@ export default function BookCard({
   return (
     <div
       onClick={handleClick}
-      className={`group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer transform hover:-translate-y-2 hover:scale-[1.02] h-[280px] flex ${
+
+      className={`group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer transform hover:-translate-y-2 hover:scale-[1.02] h-[280px] flex ${
+
+
         reverse ? "flex-row-reverse" : "flex-row"
       }`}
     >
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-400/10 dark:via-purple-400/10 dark:to-pink-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
 
       {/* Book Cover Section */}
       <div className="relative w-[200px] h-full perspective-1000 flex-shrink-0">
@@ -89,7 +94,9 @@ export default function BookCard({
         </div>
 
         {/* 3D Transform Container */}
-        <div className="relative w-full h-full transform-style-3d group-hover:rotate-y-10 transition-transform duration-700">
+
+        <div className="relative w-full h-full preserve-3d">
+
           {/* Shadow Effect */}
           <div
             className={`absolute ${
@@ -103,7 +110,9 @@ export default function BookCard({
           <div className="absolute inset-0 preserve-3d">
             {/* Front Cover */}
             <div className="absolute inset-0 backface-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white to-indigo-50 rounded-lg shadow-inner" />
+
+              <div className="absolute inset-0 bg-gradient-to-br from-white dark:from-gray-800 to-indigo-50 dark:to-gray-900 rounded-lg shadow-inner" />
+
               <img
                 src={getHighQualityThumbnail(thumbnail)}
                 alt={title}
@@ -122,17 +131,10 @@ export default function BookCard({
                 }}
               />
               {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 dark:via-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             </div>
 
-            {/* Book Spine Effect */}
-            <div
-              className={`absolute ${
-                reverse ? "right-0" : "left-0"
-              } top-0 w-4 h-full bg-black/10 transform ${
-                reverse ? "translate-x-4" : "-translate-x-4"
-              } rounded-l-sm preserve-3d rotate-y-90`}
-            />
           </div>
         </div>
       </div>
@@ -141,40 +143,46 @@ export default function BookCard({
       <div className="flex-1 p-8 flex flex-col justify-between relative">
         <div>
           <div className="flex items-start justify-between gap-4">
-            <h2 className="font-dmSans text-3xl font-bold leading-tight line-clamp-2 bg-gradient-to-br from-gray-900 to-indigo-900 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
+            <h2 className="font-dmSans text-3xl font-bold leading-tight line-clamp-2 bg-gradient-to-br from-gray-900 to-indigo-900 dark:from-indigo-300 dark:to-purple-300 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-600 dark:group-hover:from-indigo-400 dark:group-hover:to-purple-400 transition-all duration-300">
               {title}
             </h2>
             <ChevronRight
-              className={`flex-shrink-0 w-6 h-6 text-indigo-400 group-hover:text-indigo-600 transform group-hover:translate-x-2 transition-all duration-500 ${
+              className={`flex-shrink-0 w-6 h-6 text-indigo-400 group-hover:text-indigo-600 dark:text-indigo-300 dark:group-hover:text-indigo-400 transform group-hover:translate-x-2 transition-all duration-500 ${
                 reverse ? "rotate-180 group-hover:-translate-x-2" : ""
               }`}
             />
           </div>
 
-          <p className="mt-3 font-medium tracking-wide uppercase text-sm text-indigo-600/90 group-hover:text-indigo-700 transition-colors duration-300">
+
+          <p className="mt-3 font-medium tracking-wide uppercase text-sm text-indigo-600/90 dark:text-indigo-400/90 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors duration-300">
+
             {authors?.join(" · ")}
           </p>
 
           {description && (
-            <p className="mt-4 text-gray-600 text-base leading-relaxed line-clamp-3 font-light group-hover:text-gray-800 transition-colors duration-300">
+
+            <p className="mt-4 text-gray-600 dark:text-gray-300 text-base leading-relaxed line-clamp-3 font-light group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">
+
               {description}
             </p>
           )}
 
           {/* Genre Tags */}
-          {Array.isArray(genre_tags) && genre_tags.length > 0 && (
+          {genre_tags && genre_tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {genre_tags.slice(0, 3).map((tag, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors duration-300"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/30 transition-colors duration-300"
                 >
                   <Tag className="w-3 h-3" />
                   {tag}
                 </span>
               ))}
               {genre_tags.length > 3 && (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors duration-300">
+
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/30 transition-colors duration-300">
+
                   +{genre_tags.length - 3} more
                 </span>
               )}
@@ -183,15 +191,17 @@ export default function BookCard({
         </div>
 
         {/* Stats Section */}
-        <div className="flex items-center gap-8 mt-6 pt-4 border-t border-indigo-50">
-          <div className="flex items-center gap-2.5 text-indigo-500 group-hover:text-indigo-600 transition-all duration-300 transform group-hover:scale-105">
+
+        <div className="flex items-center gap-8 mt-6 pt-4 border-t border-indigo-50 dark:border-indigo-500/20">
+          <div className="flex items-center gap-2.5 text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-all duration-300 transform group-hover:scale-105">
+
             <ThumbsUp className="w-5 h-5" />
             <span className="text-sm font-semibold tracking-wide">
               {upvotes}
             </span>
           </div>
           {publishedDate && (
-            <div className="flex items-center gap-2.5 text-indigo-500 group-hover:text-indigo-600 transition-all duration-300 transform group-hover:scale-105">
+            <div className="flex items-center gap-2.5 text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-all duration-300 transform group-hover:scale-105">
               <Calendar className="w-5 h-5" />
               <span className="text-sm font-semibold tracking-wide">
                 {new Date(publishedDate).getFullYear()}
