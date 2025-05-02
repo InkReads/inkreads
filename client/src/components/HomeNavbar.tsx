@@ -16,7 +16,7 @@ import { auth } from '@/lib/firebase';
 // import { SidebarTrigger } from '@/components/ui/sidebar';
 import SearchInput from '@/components/SearchInput';
 import logo from '@/assets/icons/black-logo.png';
-
+// Genres
 const NAVIGATION_SECTIONS = [
   { "Community": ["Stories", "Authors", "Users"] },
   { "Browse": ["Novels", "Light Novels", "Comics", "Manga", "Fanfiction"] },
