@@ -31,25 +31,23 @@ export default function LandingHeader() {
   const { user } = useAuthStore();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-background/80 backdrop-blur-sm border-b border-border">
-      <header className="w-full flex gap-8 items-center">
-        {/* Logo Section */}
-        <div className="flex items-center">
-          <Link to="/">
-            <span className="text-2xl text-foreground">InkReads</span>
-          </Link>
-        </div>
-      </header>
+    <nav className="fixed top-0 left-0 right-0 h-16 px-8 flex items-center justify-between z-50 font-dmSans tracking-wider bg-transparent">
+      {/* Logo Section */}
+      <div className="flex items-center">
+        <Link to="/">
+          <span className="text-2xl text-white">InkReads</span>
+        </Link>
+      </div>
 
       {/* Navigation and Auth Section */}
-      <section className="flex items-center">
-        <div className="flex justify-between mx-2">
+      <div className="flex items-center gap-12">
+        <div className="flex gap-8">
           {NAVIGATION_SECTIONS.map((section, index) => (
             <NavDropdown key={index} section={section} />
           ))}
         </div>
         {user ? <UserMenu /> : <AuthActions />}
-      </section>
+      </div>
     </nav>
   );
 }
@@ -60,22 +58,22 @@ function NavDropdown({ section }: NavDropdownProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="focus:outline-none text-inherit hover:cursor-pointer">
+      <DropdownMenuTrigger asChild className="focus:outline-none">
         <div className="hidden lg:block items-center">
-          <Button variant="ghost" className="text-foreground hover:text-foreground/80">
+          <Button variant="ghost" className="text-white hover:bg-transparent hover:text-white">
             {title}
             <ChevronDownIcon className="w-4 h-4 ml-1" />
           </Button>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
+      <DropdownMenuContent className="bg-white/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
         <div className="flex flex-col">
           {items.map((item: string, index: number) => (
             <Button 
               variant="link" 
               asChild 
               key={index}
-              className="px-4 hover:bg-muted text-foreground"
+              className="px-4 hover:bg-transparent text-black"
             >
               <Link to={item === "Authors" ? "/fanfiction/user" : item === "Resources" ? "/resources" : `/genres/${item.toLowerCase().replace(" ", "")}`}>
                 {item}
@@ -146,11 +144,11 @@ function UserMenu() {
 
 function AuthActions() {
   return (
-    <div className="flex gap-2">
-      <Button variant="default" asChild className="hidden sm:block bg-primary hover:bg-primary/90 text-primary-foreground">
+    <div className="flex gap-4">
+      <Button variant="default" asChild className="bg-[#4D74FF] hover:bg-[#3D64EE] text-white">
         <Link to="/login">Login</Link>
       </Button>
-      <Button variant="default" asChild className="hidden sm:block bg-primary hover:bg-primary/90 text-primary-foreground">
+      <Button variant="default" asChild className="bg-[#4D74FF] hover:bg-[#3D64EE] text-white">
         <Link to="/signup">Sign Up</Link>
       </Button>
     </div>
