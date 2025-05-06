@@ -77,7 +77,7 @@
     
     return (
       <form className="flex flex-col justify-center items-center" onSubmit={handleSubmit(onSubmit)}>
-        <div className={`flex flex-col w-[420px] sm:w-[521px] mt-4 [&>input]:h-10 [&>input]:text-xl [&>input]:rounded-lg [&>input]:pl-[10px] [&>input]:shadow-none ${errors.username || errors.email || errors.password ? "gap-2" : "gap-6"}`}>
+        <div className={`flex flex-col w-[420px] sm:w-[521px] mt-4 [&>input]:h-10 [&>input]:text-xl [&>input]:rounded-lg [&>input]:pl-[10px] [&>input]:shadow-none ${errors.username || errors.email || errors.password ? "gap-2" : "gap-6"} dark:[&>input]:bg-white`}>
           <Input 
             placeholder="Username" 
             {...register("username", {

@@ -45,15 +45,15 @@ export default function HomeNavbar() {
         {/* Logo Section */}
         <div className="flex gap-2 items-center">
           {/** user && <SidebarTrigger className="hover:cursor-pointer" /> **/}
-          <div className="hidden lg:block">
-            <img 
-              src={isDarkMode ? whiteLogo : blackLogo} 
-              alt="logo-image" 
-              width={70} 
-              className="mt-2" 
-            />
-          </div>
-          <Link to="/">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="hidden lg:block">
+              <img
+                src={isDarkMode ? whiteLogo : blackLogo} 
+                alt="logo-image" 
+                width={70} 
+                className="mt-2" 
+              />
+            </div>
             <span className="text-2xl text-foreground">InkReads</span>
           </Link>
         </div>

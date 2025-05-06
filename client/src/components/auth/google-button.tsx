@@ -48,7 +48,7 @@ export default function GoogleAuthButton() {
     <Button
       onClick={handleGoogleSignIn}
       variant="outline"
-      className="flex justify-center items-center text-base font-bold w-[521px] h-10 bg-white hover:bg-white text-[#656565] relative shadow-none border-[1px] rounded-lg mt-3"
+      className="flex justify-center items-center text-base font-bold w-[521px] h-10 bg-white hover:bg-white text-[#656565] relative shadow-none border-[1px] rounded-lg mt-3 dark:bg-white"
     >
       <img src={GoogleIcon} alt="Google Logo" className="absolute left-0 not-first:w-6 h-6 ml-2" />
       Continue with Google
