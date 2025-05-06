@@ -1,6 +1,8 @@
 import { ThumbsUp, Calendar, ChevronRight, Star, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface BookCardProps {
   id: string;
@@ -8,6 +10,7 @@ interface BookCardProps {
   authors: string[];
   thumbnail: string;
   upvotes?: number;
+  downvotes?: number;
   description?: string;
   publishedDate?: string;
   reverse?: boolean;
@@ -19,7 +22,8 @@ export default function BookCard({
   title,
   authors,
   thumbnail,
-  upvotes = 0,
+  upvotes: initialUpvotes = 0,
+  downvotes: initialDownvotes = 0,
   description,
   publishedDate,
   reverse = false,
@@ -27,6 +31,27 @@ export default function BookCard({
 }: BookCardProps) {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [upvotes, setUpvotes] = useState(initialUpvotes);
+  const [downvotes, setDownvotes] = useState(initialDownvotes);
+
+  useEffect(() => {
+    async function fetchVotes() {
+      try {
+        const bookRef = doc(db, 'books', id);
+        const bookDoc = await getDoc(bookRef);
+        
+        if (bookDoc.exists()) {
+          const data = bookDoc.data();
+          setUpvotes(data.upvotes?.length || 0);
+          setDownvotes(data.downvotes?.length || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching votes:', error);
+      }
+    }
+
+    fetchVotes();
+  }, [id]);
 
   console.log('BookCard props for:', title, {
     id,
@@ -57,6 +82,7 @@ export default function BookCard({
         authors,
         imageLinks: { thumbnail },
         upvotes,
+        downvotes,
         description,
         publishedDate,
         genre_tags
@@ -90,7 +116,11 @@ export default function BookCard({
           } bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 flex items-center gap-2 z-10`}
         >
           <Star className="w-4.5 h-4.5" />
-          <span className="font-medium">4.5</span>
+          <span className="font-medium">
+            {upvotes + downvotes > 0 
+              ? ((upvotes / (upvotes + downvotes)) * 5).toFixed(1)
+              : '0.0'}
+          </span>
         </div>
 
         {/* 3D Transform Container */}
@@ -140,10 +170,10 @@ export default function BookCard({
       </div>
 
       {/* Book Info Section */}
-      <div className="flex-1 p-8 flex flex-col justify-between relative">
-        <div>
+      <div className="flex-1 p-8 flex flex-col justify-between relative overflow-hidden">
+        <div className="overflow-x-hidden overflow-y-auto pr-2">
           <div className="flex items-start justify-between gap-4">
-            <h2 className="font-dmSans text-3xl font-bold leading-tight line-clamp-2 bg-gradient-to-br from-gray-900 to-indigo-900 dark:from-indigo-300 dark:to-purple-300 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-600 dark:group-hover:from-indigo-400 dark:group-hover:to-purple-400 transition-all duration-300">
+            <h2 className="font-dmSans text-3xl font-bold leading-tight bg-gradient-to-br from-gray-900 to-indigo-900 dark:from-indigo-300 dark:to-purple-300 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-600 dark:group-hover:from-indigo-400 dark:group-hover:to-purple-400 transition-all duration-300">
               {title}
             </h2>
             <ChevronRight
@@ -161,7 +191,7 @@ export default function BookCard({
 
           {description && (
 
-            <p className="mt-4 text-gray-600 dark:text-gray-300 text-base leading-relaxed line-clamp-3 font-light group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">
+            <p className="mt-4 text-gray-600 dark:text-gray-300 text-base leading-relaxed line-clamp-4 font-light group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">
 
               {description}
             </p>
@@ -192,7 +222,7 @@ export default function BookCard({
 
         {/* Stats Section */}
 
-        <div className="flex items-center gap-8 mt-6 pt-4 border-t border-indigo-50 dark:border-indigo-500/20">
+        <div className="flex items-center gap-8 mt-4 pt-4 border-t border-indigo-50 dark:border-indigo-500/20">
           <div className="flex items-center gap-2.5 text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-all duration-300 transform group-hover:scale-105">
 
             <ThumbsUp className="w-5 h-5" />

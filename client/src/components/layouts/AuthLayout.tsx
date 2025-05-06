@@ -7,7 +7,7 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <main className="font-abeezee flex justify-center h-screen">
+    <main className="light font-abeezee flex justify-center h-screen">
       <div className="flex items-center gap-8">
         <img src={NotebookIcon} alt="book" width={198} height={198} className="mt-108" />
         <div className="flex flex-col items-center">

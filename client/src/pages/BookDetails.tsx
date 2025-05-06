@@ -459,7 +459,11 @@ export default function BookDetails() {
               <div className="absolute -top-3 -right-3 bg-card rounded-full p-3 shadow-lg">
                 <div className="flex items-center gap-1.5">
                   <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  <span className="font-semibold text-foreground">4.5</span>
+                  <span className="font-semibold text-foreground">
+                    {book.upvotes?.length + book.downvotes?.length > 0 
+                      ? ((book.upvotes?.length / (book.upvotes?.length + book.downvotes?.length)) * 5).toFixed(1)
+                      : '0.0'}
+                  </span>
                 </div>
               </div>
 
