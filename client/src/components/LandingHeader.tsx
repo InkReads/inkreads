@@ -15,8 +15,8 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
 const NAVIGATION_SECTIONS = [
-  { "Community": ["Stories", "Authors", "Users"] },
-  { "Browse": ["Novels", "Light Novels", "Comics", "Fanfiction"] },
+  { "Community": ["Authors", "Resources"] },
+  { "Browse": ["Novels", "Light Novels", "Comics", "Manga", "Fanfiction"] },
 ] as const;
 
 type MenuItem = 
@@ -31,12 +31,12 @@ export default function LandingHeader() {
   const { user } = useAuthStore();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans text-white tracking-wider">
+    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-background/80 backdrop-blur-sm border-b border-border">
       <header className="w-full flex gap-8 items-center">
         {/* Logo Section */}
         <div className="flex items-center">
           <Link to="/">
-            <span className="text-2xl">InkReads</span>
+            <span className="text-2xl text-foreground">InkReads</span>
           </Link>
         </div>
       </header>
@@ -62,22 +62,22 @@ function NavDropdown({ section }: NavDropdownProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="focus:outline-none text-inherit hover:cursor-pointer">
         <div className="hidden lg:block items-center">
-          <Button variant="ghost">
+          <Button variant="ghost" className="text-foreground hover:text-foreground/80">
             {title}
             <ChevronDownIcon className="w-4 h-4 ml-1" />
           </Button>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-[#f3f4f6] border-[#e5e7eb] shadow-md">
+      <DropdownMenuContent className="bg-card/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
         <div className="flex flex-col">
           {items.map((item: string, index: number) => (
             <Button 
               variant="link" 
               asChild 
               key={index}
-              className="px-4 hover:bg-muted"
+              className="px-4 hover:bg-muted text-foreground"
             >
-              <Link to={`/genres/${item.toLowerCase().replace(" ", "")}`}>
+              <Link to={item === "Authors" ? "/fanfiction/user" : item === "Resources" ? "/resources" : `/genres/${item.toLowerCase().replace(" ", "")}`}>
                 {item}
               </Link>
             </Button>
@@ -117,11 +117,11 @@ function UserMenu() {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-[#f3f4f6] border-[#e5e7eb] shadow-md">
-        <DropdownMenuLabel className="font-bold">
+      <DropdownMenuContent align="end" className="bg-card/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
+        <DropdownMenuLabel className="font-bold text-foreground">
           {userData?.username}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="w-full ml-0 bg-gray-300"/>
+        <DropdownMenuSeparator className="w-full ml-0 bg-border"/>
         <section className="flex flex-col items-start">
           {menuItems.map((item, index) => (
             <Button 
@@ -129,6 +129,7 @@ function UserMenu() {
               key={index}
               onClick={'onClick' in item ? item.onClick : undefined}
               asChild={'href' in item}
+              className="text-foreground hover:text-foreground/80"
             >
               {'onClick' in item ? (
                 item.name
@@ -146,10 +147,10 @@ function UserMenu() {
 function AuthActions() {
   return (
     <div className="flex gap-2">
-      <Button variant="default" asChild className="hidden sm:block bg-blue-600 hover:bg-blue-500 text-white">
+      <Button variant="default" asChild className="hidden sm:block bg-primary hover:bg-primary/90 text-primary-foreground">
         <Link to="/login">Login</Link>
       </Button>
-      <Button variant="default" asChild className="hidden sm:block bg-blue-600 hover:bg-blue-500 text-white">
+      <Button variant="default" asChild className="hidden sm:block bg-primary hover:bg-primary/90 text-primary-foreground">
         <Link to="/signup">Sign Up</Link>
       </Button>
     </div>
