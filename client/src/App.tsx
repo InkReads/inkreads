@@ -13,7 +13,7 @@ import BookDetails from './pages/BookDetails';
 import GenrePage from './pages/GenrePage';
 import UserFanfictionsPage from './pages/UserFanfictionsPage';
 import CreateFanfictionPage from './pages/CreateFanfictionPage';
-
+import ResourcesPage from './pages/ResourcesPage';
 import Settings from './pages/Settings';
 import ThemeProvider from './components/providers/ThemeProvider';
 
@@ -124,6 +124,14 @@ export default function App() {
             element={
               <AuthCheck>
                 <BookDetails />
+              </AuthCheck>
+            }
+          />
+          <Route
+            path="/resources"
+            element={
+              <AuthCheck>
+                <ResourcesPage />
               </AuthCheck>
             }
           />

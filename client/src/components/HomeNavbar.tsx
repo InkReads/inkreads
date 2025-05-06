@@ -13,15 +13,17 @@ import { useAuthStore } from '@/store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useThemeStore } from '@/store/themeStore';
 // import { SidebarTrigger } from '@/components/ui/sidebar';
 import SearchInput from '@/components/SearchInput';
-import logo from '@/assets/icons/black-logo.png';
+import blackLogo from '@/assets/icons/black-logo.png';
+import whiteLogo from '@/assets/icons/logo.png';
 
 
 // Genre & Community
 
 const NAVIGATION_SECTIONS = [
-  { "Community": ["Stories", "Authors", "Users"] },
+  { "Community": ["Authors", "Resources"] },
   { "Browse": ["Novels", "Light Novels", "Comics", "Manga", "Fanfiction"] },
 ] as const;
 
@@ -34,19 +36,22 @@ interface NavDropdownProps {
 }
 
 export default function HomeNavbar() {
-
-  const { user } = useAuthStore(); 
-
+  const { user } = useAuthStore();
+  const { isDarkMode } = useThemeStore();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-white shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 h-16 px-4 flex items-center z-50 font-dmSans tracking-wider bg-background border-b border-border">
       <header className="w-full flex gap-4 items-center">
-
         {/* Logo Section */}
         <div className="flex gap-2 items-center">
           {/** user && <SidebarTrigger className="hover:cursor-pointer" /> **/}
           <div className="hidden lg:block">
-            <img src={logo} alt="logo-image" width={70} className="mt-2" />
+            <img 
+              src={isDarkMode ? whiteLogo : blackLogo} 
+              alt="logo-image" 
+              width={70} 
+              className="mt-2" 
+            />
           </div>
           <Link to="/">
             <span className="text-2xl text-foreground">InkReads</span>
@@ -76,7 +81,7 @@ function NavDropdown({ section }: NavDropdownProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="focus:outline-none text-inherit hover:cursor-pointer">
         <div className="hidden lg:block items-center">
-          <Button variant="ghost">
+          <Button variant="ghost" className="text-foreground hover:text-foreground/80">
             {title}
             <ChevronDownIcon className="w-4 h-4 ml-1" />
           </Button>
@@ -84,16 +89,15 @@ function NavDropdown({ section }: NavDropdownProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="bg-card/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
-
         <div className="flex flex-col">
           {items.map((item: string, index: number) => (
             <Button 
               variant="link" 
               asChild 
               key={index}
-              className="px-4 hover:bg-muted"
+              className="px-4 hover:bg-muted text-foreground"
             >
-              <Link to={`/genres/${item.toLowerCase().replace(" ", "")}`}>
+              <Link to={item === "Authors" ? "/fanfiction/user" : item === "Resources" ? "/resources" : `/genres/${item.toLowerCase().replace(" ", "")}`}>
                 {item}
               </Link>
             </Button>
@@ -135,7 +139,7 @@ function UserMenu() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="bg-card/80 backdrop-blur-sm border border-border ring-1 ring-ring/10 shadow-md">
-        <DropdownMenuLabel className="font-bold">
+        <DropdownMenuLabel className="font-bold text-foreground">
           {userData?.username}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="w-full ml-0 bg-border"/>
@@ -147,6 +151,7 @@ function UserMenu() {
               key={index}
               onClick={'onClick' in item ? item.onClick : undefined}
               asChild={'href' in item}
+              className="text-foreground hover:text-foreground/80"
             >
               {'onClick' in item ? (
                 item.name
@@ -164,10 +169,10 @@ function UserMenu() {
 function AuthActions() {
   return (
     <div className="flex gap-2">
-      <Button variant="link" asChild className="hidden sm:block">
+      <Button variant="link" asChild className="hidden sm:block text-foreground hover:text-foreground/80">
         <Link to="/login">Login</Link>
       </Button>
-      <Button variant="default" asChild className="hidden sm:block bg-blue-600 hover:bg-blue-500 text-white">
+      <Button variant="default" asChild className="hidden sm:block bg-primary hover:bg-primary/90 text-primary-foreground">
         <Link to="/signup">Sign Up</Link>
       </Button>
     </div>
